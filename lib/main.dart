@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'themes/light_theme.dart';
 import 'themes/dark_theme.dart';
-import 'sidebar_widget.dart';
 // import 'theme_data.dart';
 
 void main() {
@@ -16,7 +15,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.light; 
+  ThemeMode _themeMode = ThemeMode.light;
 
   void _toggleTheme() {
     setState(() {
@@ -46,7 +45,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -57,11 +55,10 @@ class HomeScreen extends StatelessWidget {
             icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
             onPressed: onToggleTheme,
             tooltip: "Cambiar tema",
-          )
+          ),
         ],
       ),
-      body: Center(
-      ),
+      body: Center(child: Text("FARMACIA JOSHUA")),
     );
   }
 }
