@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'themes/light_theme.dart';
 import 'themes/dark_theme.dart';
+import 'sidebar_widget.dart';
 // import 'theme_data.dart';
 
 void main() {
@@ -45,10 +46,12 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: colors.primary,
         title: const Text("Home"),
         actions: [
           IconButton(
@@ -58,6 +61,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+      drawer: SidebarWidget(),
       body: Center(child: Text("FARMACIA JOSHUA")),
     );
   }

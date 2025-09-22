@@ -12,5 +12,6 @@ final ThemeData lightTheme = ThemeData(
     onError: Color(0xFF4D0A0F), 
     surface: Color(0xFFF4F4F4), 
     onSurface: Colors.black,
-    )
+    ),
+  useMaterial3: true
 );
