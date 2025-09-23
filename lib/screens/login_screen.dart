@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),//espacio entre la imagen y el campo de usuario
 
-              // Usuario
+              // ------Apartado de Usuario---------
               TextField(
                 controller: _usernameController, //asociamos el controlador al campo de usuario
                 decoration: InputDecoration( //decoracion del campo de usuario
@@ -73,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),//espacio entre el campo de usuario y el campo de contraseña
 
-              // Contraseña
+              // ------Apartado de Contraseña---------
               TextField(
                 controller: _passwordController, //asociamos el controlador al campo de contraseña
                 obscureText: true, //oculta el texto ingresado en el campo de contraseña
@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 24),//espacio entre el campo de contraseña y el botón login
 
-              // Botón login
+              // ------Boton de login---------
               ElevatedButton(
                 onPressed: _login, //llama a la función _login cuando se presiona el botón
                 style: ElevatedButton.styleFrom( //estilo del botón
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),//espacio entre el botón login y el link "olvidó contraseña"
 
-              // Link "olvidó contraseña"
+              // ------Link de olvido contraseña (de momento no estara funcional)---------
               TextButton(
                 onPressed: () {},
                 child: const Text(
