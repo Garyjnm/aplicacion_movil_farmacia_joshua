@@ -6,21 +6,31 @@ final ThemeData lightTheme = ThemeData(
   colorScheme: const ColorScheme(
     brightness: Brightness.light, 
     primary: Color(0xFFBED6E3), 
-    onPrimary: Color(0xFF1B194B), 
+    onPrimary: Color(0xFF4D0A0F), 
     secondary: Color(0xFFA3BECD), 
     onSecondary: Color(0xFF1B194B), 
     tertiary: Color(0xFF6D8D9F),
-    onTertiary: Color(0xFFF4F4F4) ,
+    onTertiary: Color(0xFFF4F4F4),
     error: Color(0xFFE6F2F9 ), 
     onError: Color(0xFF4D0A0F), 
     surface: Color(0xFFF4F4F4), 
-    onSurface: Colors.black,
+    onSurface: Color(0xFF1B194B),
     ),
   //Fuentes
   fontFamily: "Segoe UI",
   textTheme: const TextTheme(
-    bodyLarge: TextStyle(fontSize: 16),
-    bodyMedium: TextStyle(fontSize: 14),
-    bodySmall: TextStyle(fontSize: 12) ),
+    //Titulos
+    titleLarge: TextStyle(fontSize: 24),
+    titleMedium: TextStyle(fontSize: 22),
+    titleSmall: TextStyle(fontSize: 20),
+    //texto de párrafos o contenido principal)
+    bodyLarge: TextStyle(fontSize: 18),
+    bodyMedium: TextStyle(fontSize: 16),
+    bodySmall: TextStyle(fontSize: 14),
+    //labels en botones
+    labelLarge: TextStyle(fontSize: 12),
+    labelMedium: TextStyle(fontSize: 11),
+    labelSmall: TextStyle(fontSize: 10),
+    ),
   useMaterial3: true
 );
