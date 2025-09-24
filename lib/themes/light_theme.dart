@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
+  //Colores
   colorScheme: const ColorScheme(
     brightness: Brightness.light, 
     primary: Color(0xFFBED6E3), 
@@ -15,5 +16,11 @@ final ThemeData lightTheme = ThemeData(
     surface: Color(0xFFF4F4F4), 
     onSurface: Colors.black,
     ),
+  //Fuentes
+  fontFamily: "Segoe UI",
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(fontSize: 16),
+    bodyMedium: TextStyle(fontSize: 14),
+    bodySmall: TextStyle(fontSize: 12) ),
   useMaterial3: true
 );
