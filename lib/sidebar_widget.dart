@@ -11,10 +11,12 @@ class SidebarWidget extends StatelessWidget {
 
     return Drawer(
       child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           //Header del side bar
           DrawerHeader(
-            decoration: BoxDecoration(color: colors.primary),
+            margin: EdgeInsets.zero,
+            decoration: BoxDecoration(color: colors.primaryContainer),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -32,7 +34,8 @@ class SidebarWidget extends StatelessWidget {
           //Elementos del sidebar
           //Home
           ListTile(
-            leading: Icon(Icons.home, color: colors.onPrimary),
+            tileColor: colors.primary,
+            leading: Icon(Icons.home),
             title: Text("Home"),
             onTap: () {
               Navigator.pop(context);
@@ -44,8 +47,10 @@ class SidebarWidget extends StatelessWidget {
               );
             },
           ),
+          //Ventas
           ListTile(
-            leading: Icon(Icons.receipt_long, color: colors.onPrimary),
+            tileColor: colors.primary,
+            leading: Icon(Icons.receipt_long),
             title: Text("Ventas"),
             onTap: () {
               Navigator.pop(context);
@@ -56,6 +61,54 @@ class SidebarWidget extends StatelessWidget {
                 ),
               );
             },
+          ),
+          //Compras
+          ListTile(
+            tileColor: colors.primary,
+            leading: Icon(Icons.shopping_cart),
+            title: Text("Compras"),
+          ),
+          //Inventario
+          ExpansionTile(
+            collapsedBackgroundColor: colors.primary,
+            iconColor: colors
+                .onPrimary, //Color del icono de la derecha cuando esta expandido
+            leading: Icon(Icons.inventory),
+            title: Text("Inventario"),
+            childrenPadding: EdgeInsets.only(left: 10),
+            children: [
+              ListTile(
+                leading: Icon(Icons.shopping_bag),
+                title: Text("Productos"),
+              ),
+              ListTile(
+                leading: Icon(Icons.category),
+                title: Text("Categorias"),
+              ),
+              ListTile(
+                leading: Icon(Icons.local_shipping),
+                title: Text("Proveedores"),
+              ),
+            ],
+          ),
+          //Clientes
+          ListTile(
+            leading: Icon(Icons.list),
+            title: Text("Clientes"),
+          ),
+          //Configuracion
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text("Configuracion"),
+          ),
+          ListTile(
+            leading: Icon(Icons.help),
+            title: Text("Soporte"),
+          ),
+          //Cerrar sesion
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text("Cerrar Sesion"),
           ),
         ],
       ),
