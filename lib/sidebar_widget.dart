@@ -10,6 +10,7 @@ class SidebarWidget extends StatelessWidget {
     final fonts = Theme.of(context).textTheme;
 
     return Drawer(
+      backgroundColor: colors.primary,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -34,7 +35,6 @@ class SidebarWidget extends StatelessWidget {
           //Elementos del sidebar
           //Home
           ListTile(
-            tileColor: colors.primary,
             leading: Icon(Icons.home),
             title: Text("Home"),
             onTap: () {
@@ -49,7 +49,6 @@ class SidebarWidget extends StatelessWidget {
           ),
           //Ventas
           ListTile(
-            tileColor: colors.primary,
             leading: Icon(Icons.receipt_long),
             title: Text("Ventas"),
             onTap: () {
@@ -64,15 +63,13 @@ class SidebarWidget extends StatelessWidget {
           ),
           //Compras
           ListTile(
-            tileColor: colors.primary,
             leading: Icon(Icons.shopping_cart),
             title: Text("Compras"),
           ),
           //Inventario
           ExpansionTile(
             collapsedBackgroundColor: colors.primary,
-            iconColor: colors
-                .onPrimary, //Color del icono de la derecha cuando esta expandido
+            iconColor: colors.onPrimary, //Color del icono de la derecha cuando esta expandido
             leading: Icon(Icons.inventory),
             title: Text("Inventario"),
             childrenPadding: EdgeInsets.only(left: 10),
@@ -89,12 +86,20 @@ class SidebarWidget extends StatelessWidget {
                 leading: Icon(Icons.local_shipping),
                 title: Text("Proveedores"),
               ),
+              ListTile(
+                leading: Icon(Icons.assignment_ind),
+                title: Text("Roles"),
+              ),
             ],
           ),
           //Clientes
           ListTile(
             leading: Icon(Icons.list),
             title: Text("Clientes"),
+          ),
+          ListTile(
+            leading: Icon(Icons.people),
+            title: Text("Usuarios"),
           ),
           //Configuracion
           ListTile(
