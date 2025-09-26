@@ -36,6 +36,7 @@ class _MyAppState extends State<MyApp> {
       darkTheme: darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
+      
       home: HomeScreen(onToggleTheme: _toggleTheme),
     );
   }
@@ -63,7 +64,41 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       drawer: SidebarWidget(),
-      body: Center(child: Text("FARMACIA JOSHUA")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ElevatedButton(onPressed: () {}, child: Text("Botón Elevado",)),
+              SizedBox(height: 10),
+              TextField(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: "Buscar...",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(Icons.home),
+                  Icon(Icons.favorite),
+                  Icon(Icons.settings),
+                ],
+              ),
+              SizedBox(height: 10),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("Card de prueba"),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
