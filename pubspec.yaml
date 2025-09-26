@@ -50,8 +50,23 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-flutter:
 
+flutter:
+  assets:
+    - assets/images/ #agregamos los assets para que flutter los incluya dentro de la app
+  fonts:
+    - family: "Segoe UI"
+      fonts:
+        - asset: assets/fonts/segoeuithis.ttf
+          weight: 400 #regular
+        - asset: assets/fonts/segoeuithisbd.ttf
+          weight: 700 #bold
+        - asset: assets/fonts/segoeuithisi.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/segoeuithisz.ttf
+          weight: 700
+          style: italic
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
