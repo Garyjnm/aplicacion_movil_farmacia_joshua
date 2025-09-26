@@ -1,4 +1,3 @@
-import 'package:aplicacion_movil_farmacia_joshua/test.dart';
 import 'package:flutter/material.dart';
 
 class SidebarWidget extends StatelessWidget {
@@ -37,29 +36,11 @@ class SidebarWidget extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.home),
             title: Text("Home"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const PlaceholderScreen(title: "Prueba"),
-                ),
-              );
-            },
           ),
           //Ventas
           ListTile(
             leading: Icon(Icons.receipt_long),
             title: Text("Ventas"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const PlaceholderScreen(title: "Ventas"),
-                ),
-              );
-            },
           ),
           //Compras
           ListTile(
