@@ -21,17 +21,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
-    final username =
-        _usernameController.text; //obtenemos el texto del campo de usuario
-    final password =
-        _passwordController.text; //obtenemos el texto del campo de contraseña
+    final username = _usernameController.text; //obtenemos el texto del campo de usuario
+    final password = _passwordController.text; //obtenemos el texto del campo de contraseña
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Por favor ingrese usuario y contraseña',
-          ), //mensaje de error si el usuario o la contraseña estan vacios
+          ),
           duration: Duration(seconds: 2),
         ),
       );
