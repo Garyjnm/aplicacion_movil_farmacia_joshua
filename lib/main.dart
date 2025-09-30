@@ -75,6 +75,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  void onToggleTheme() {
+    final myAppState = context.findAncestorStateOfType<_MyAppState>();
+    myAppState?._toggleTheme();
+  }
   int _counter = 0;
 
   void _incrementCounter() {
