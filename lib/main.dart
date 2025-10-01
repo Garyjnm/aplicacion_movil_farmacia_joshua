@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/pagecategories.dart';
+import 'ui/authentication/screens/categorias_screen.dart';
 import 'ui/core/themes/light_theme.dart';
 import 'ui/core/themes/dark_theme.dart';
 import 'sidebar_widget.dart';
@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const CategoriasPage(),
+      home: const CategoriasScreen(),
     );
   }
 }
@@ -79,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final myAppState = context.findAncestorStateOfType<_MyAppState>();
     myAppState?._toggleTheme();
   }
+
   int _counter = 0;
 
   void _incrementCounter() {
@@ -116,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ElevatedButton(onPressed: () {}, child: Text("Botón Elevado",)),
+              ElevatedButton(onPressed: () {}, child: Text("Botón Elevado")),
               SizedBox(height: 10),
               TextField(
                 decoration: InputDecoration(

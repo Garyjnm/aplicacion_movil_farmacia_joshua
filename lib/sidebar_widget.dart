@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ui/authentication/screens/categorias_screen.dart';
 
 class SidebarWidget extends StatelessWidget {
   const SidebarWidget({super.key});
@@ -33,24 +34,16 @@ class SidebarWidget extends StatelessWidget {
           ),
           //Elementos del sidebar
           //Home
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text("Home"),
-          ),
+          ListTile(leading: Icon(Icons.home), title: Text("Home")),
           //Ventas
-          ListTile(
-            leading: Icon(Icons.receipt_long),
-            title: Text("Ventas"),
-          ),
+          ListTile(leading: Icon(Icons.receipt_long), title: Text("Ventas")),
           //Compras
-          ListTile(
-            leading: Icon(Icons.shopping_cart),
-            title: Text("Compras"),
-          ),
+          ListTile(leading: Icon(Icons.shopping_cart), title: Text("Compras")),
           //Inventario
           ExpansionTile(
             collapsedBackgroundColor: colors.primary,
-            iconColor: colors.onPrimary, //Color del icono de la derecha cuando esta expandido
+            iconColor: colors
+                .onPrimary, //Color del icono de la derecha cuando esta expandido
             leading: Icon(Icons.inventory),
             title: Text("Inventario"),
             childrenPadding: EdgeInsets.only(left: 10),
@@ -62,6 +55,15 @@ class SidebarWidget extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.category),
                 title: Text("Categorias"),
+                onTap: () {
+                  Navigator.pop(context); // Cierra el drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CategoriasScreen(),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: Icon(Icons.local_shipping),
@@ -74,28 +76,13 @@ class SidebarWidget extends StatelessWidget {
             ],
           ),
           //Clientes
-          ListTile(
-            leading: Icon(Icons.list),
-            title: Text("Clientes"),
-          ),
-          ListTile(
-            leading: Icon(Icons.people),
-            title: Text("Usuarios"),
-          ),
+          ListTile(leading: Icon(Icons.list), title: Text("Clientes")),
+          ListTile(leading: Icon(Icons.people), title: Text("Usuarios")),
           //Configuracion
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text("Configuracion"),
-          ),
-          ListTile(
-            leading: Icon(Icons.help),
-            title: Text("Soporte"),
-          ),
+          ListTile(leading: Icon(Icons.settings), title: Text("Configuracion")),
+          ListTile(leading: Icon(Icons.help), title: Text("Soporte")),
           //Cerrar sesion
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text("Cerrar Sesion"),
-          ),
+          ListTile(leading: Icon(Icons.logout), title: Text("Cerrar Sesion")),
         ],
       ),
     );
