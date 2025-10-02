@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
       darkTheme: darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
-      
+
       home: HomeScreen(onToggleTheme: _toggleTheme),
     );
   }
@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ElevatedButton(onPressed: () {}, child: Text("Botón Elevado",)),
+              ElevatedButton(onPressed: () {}, child: Text("Botón Elevado")),
               SizedBox(height: 10),
               TextField(
                 decoration: InputDecoration(
