@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:aplicacion_movil_farmacia_joshua/screens/login_screen.dart';
+import 'ui/authentication/screens/login_screen.dart';
 import 'ui/core/themes/light_theme.dart';
 import 'ui/core/themes/dark_theme.dart';
 import 'sidebar_widget.dart';
@@ -51,7 +51,8 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
       
-      home: HomeScreen(onToggleTheme: _toggleTheme),
+      home: const LoginScreen(),
+      //home: HomeScreen(onToggleTheme: _toggleTheme),
     );
   }
 }
