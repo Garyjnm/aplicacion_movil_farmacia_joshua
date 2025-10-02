@@ -1,136 +1,160 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: CategoriasScreen(),
-    );
-  }
-}
+import '../../../data/models/categoria.dart';
+import '../../../data/services/categoria_service.dart';
 
 class CategoriasScreen extends StatefulWidget {
   const CategoriasScreen({Key? key}) : super(key: key);
+
   @override
   _CategoriasScreenState createState() => _CategoriasScreenState();
 }
 
 class _CategoriasScreenState extends State<CategoriasScreen> {
-  List<String> categorias = [
-    "Antiinflamatorios",
-    "Anticonceptivos",
-    "Cuidado ocular",
-    "Cuidado bucal",
-    "Productos cosmeticos",
-  ];
+  final CategoriaService _service = CategoriaService();
+  late Future<List<Categoria>> _futureCategorias;
 
-  TextEditingController searchController = TextEditingController();
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _futureCategorias = _service.getCategorias();
+  }
+
+  void _refresh() {
+    setState(() {
+      _futureCategorias = _service.getCategorias();
+    });
+  }
+
+  //  ventana para agregar o editar
+  void _mostrarDialogo({Categoria? categoria}) {
+    if (categoria != null) {
+      _nombreController.text = categoria.nombre;
+      _descripcionController.text = categoria.descripcion;
+    } else {
+      _nombreController.clear();
+      _descripcionController.clear();
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(categoria == null ? "Agregar Categoría" : "Editar Categoría"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nombreController,
+              decoration: InputDecoration(labelText: "Nombre"),
+            ),
+            TextField(
+              controller: _descripcionController,
+              decoration: InputDecoration(labelText: "Descripción"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (categoria == null) {
+                // Crear nueva
+                await _service.addCategoria(
+                  Categoria(
+                    nombre: _nombreController.text,
+                    descripcion: _descripcionController.text,
+                  ),
+                );
+              } else {
+                // Actualizar existente
+                await _service.updateCategoria(
+                  categoria.idCategoria!,
+                  Categoria(
+                    idCategoria: categoria.idCategoria,
+                    nombre: _nombreController.text,
+                    descripcion: _descripcionController.text,
+                  ),
+                );
+              }
+              Navigator.pop(context);
+              _refresh();
+            },
+            child: Text("Guardar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //  Confirmación para eliminar
+  void _confirmarEliminar(Categoria categoria) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Eliminar Categoría"),
+        content: Text("¿Seguro que deseas eliminar '${categoria.nombre}'?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text("Cancelar")),
+          ElevatedButton(
+            onPressed: () async {
+              await _service.deleteCategoria(categoria.idCategoria!);
+              Navigator.pop(context);
+              _refresh();
+            },
+            child: Text("Eliminar"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            //  Image.network(
-            //'https://i.imgur.com/yourLogo.png', // reemplaza con tu logo
-            // height: 40,
-            // ),
-            SizedBox(width: 10),
-            Text('Farmacia Joshua'),
-          ],
-        ),
-        backgroundColor: Colors.lightBlue[100],
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Buscador
-            TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar Categorias',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            // Botón agregar categoría
-            ElevatedButton.icon(
-              onPressed: () {
-                // Lógica para agregar categoría
-              },
-              icon: Icon(Icons.add),
-              label: Text('Agregar Categorias'),
-            ),
-            SizedBox(height: 10),
-            // Lista de categorías
-            Expanded(
-              child: ListView.builder(
-                itemCount: categorias.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 6),
-                    child: ListTile(
-                      title: Text(categorias[index]),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () {
-                              // Lógica para editar
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
-                              // Lógica para eliminar
-                            },
-                          ),
-                        ],
+      appBar: AppBar(title: Text("Categorías")),
+      body: FutureBuilder<List<Categoria>>(
+        future: _futureCategorias,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
+          if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}"));
+          if (!snapshot.hasData || snapshot.data!.isEmpty) return Center(child: Text("No hay categorías"));
+
+          final categorias = snapshot.data!;
+          return ListView.builder(
+            itemCount: categorias.length,
+            itemBuilder: (context, index) {
+              final categoria = categorias[index];
+              return Card(
+                child: ListTile(
+                  title: Text(categoria.nombre),
+                  subtitle: Text(categoria.descripcion),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () => _mostrarDialogo(categoria: categoria),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            // Paginación
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: index == 0
-                          ? Colors.blue
-                          : Colors.grey[300],
-                      minimumSize: Size(40, 40),
-                    ),
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: index == 0 ? Colors.white : Colors.black,
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _confirmarEliminar(categoria),
                       ),
-                    ),
+                    ],
                   ),
-                );
-              }),
-            ),
-          ],
-        ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _mostrarDialogo(),
+        child: Icon(Icons.add),
       ),
     );
   }
