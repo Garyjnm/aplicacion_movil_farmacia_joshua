@@ -11,17 +11,17 @@ class Categoria {
 
   factory Categoria.fromJson(Map<String, dynamic> json) {
     return Categoria(
-      idCategoria: json['idCategoria'],
-      nombre: json['nombre'],
-      descripcion: json['descripcion'],
+      idCategoria: json['IdCategoria'],
+      nombre: json['Nombre'],
+      descripcion: json['Descripcion'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "idCategoria": idCategoria,
-      "nombre": nombre,
-      "descripcion": descripcion,
+      "IdCategoria": idCategoria,
+      "Nombre": nombre,
+      "Descripcion": descripcion,
     };
   }
 }
