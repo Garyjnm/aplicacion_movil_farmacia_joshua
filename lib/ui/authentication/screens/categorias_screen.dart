@@ -20,10 +20,14 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   // Controladores para los campos de texto en el diálogo nombre y descripción
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController(); // Controlador de búsqueda
 
   // Variables para manejar la paginación
   int _currentPage = 1; // Página actual
-  final int _itemsPerPage = 5; // Número de categorías que se mostrarán por página
+  final int _itemsPerPage = 5; // Número de categorías por página
+
+  // Lista filtrada según búsqueda
+  List<Categoria> _filteredCategorias = [];
 
   @override
   void initState() {
@@ -31,6 +35,13 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
 
     // Inicializa la lista de categorías al cargar la pantalla
     _futureCategorias = _service.getCategorias();
+
+    // Escucha cambios en el campo de búsqueda
+    _searchController.addListener(() {
+      setState(() {
+        _filterCategorias();
+      });
+    });
   }
 
   // Refresca la lista de categorías
@@ -40,14 +51,22 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     });
   }
 
+  // Filtra las categorías según el texto ingresado
+  void _filterCategorias() {
+    final query = _searchController.text.toLowerCase();
+    _filteredCategorias = _filteredCategorias
+        .where((cat) =>
+            cat.nombre.toLowerCase().contains(query) ||
+            cat.descripcion.toLowerCase().contains(query))
+        .toList();
+  }
+
   // Ventana para agregar o editar
   void _mostrarDialogo({Categoria? categoria}) {
-    // Si categoria es null, estamos agregando una nueva categoría
     if (categoria != null) {
       _nombreController.text = categoria.nombre;
       _descripcionController.text = categoria.descripcion;
     } else {
-      // Limpiar los controladores si es una nueva categoría
       _nombreController.clear();
       _descripcionController.clear();
     }
@@ -55,32 +74,60 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // Título del diálogo
-        title: Text(categoria == null ? "Agregar Categoría" : "Editar Categoría"),
+        backgroundColor: Color(0xFFF4F4F4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          categoria == null ? "Agregar Categoría" : "Editar Categoría",
+          style: TextStyle(color: Color(0xFF4D0A0F), fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: _nombreController,
-              decoration: InputDecoration(labelText: "Nombre"),
+              decoration: InputDecoration(
+                labelText: "Nombre",
+                labelStyle: TextStyle(color: Color(0xFF1B194B)),
+                filled: true,
+                fillColor: Color(0xFFE6F2F9),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
+            SizedBox(height: 12),
             TextField(
               controller: _descripcionController,
-              decoration: InputDecoration(labelText: "Descripción"),
+              decoration: InputDecoration(
+                labelText: "Descripción",
+                labelStyle: TextStyle(color: Color(0xFF1B194B)),
+                filled: true,
+                fillColor: Color(0xFFE6F2F9),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
           ],
         ),
         actions: [
-          // Botón para cancelar y cerrar el diálogo
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancelar"),
+            child: Text("Cancelar", style: TextStyle(color: Color(0xFF4D0A0F))),
           ),
-          // Botón para guardar la categoría (nueva o editada)
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFBED6E3),
+              foregroundColor: Color(0xFF1B194B),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
             onPressed: () async {
               if (categoria == null) {
-                // Crear nueva categoría
                 await _service.addCategoria(
                   Categoria(
                     nombre: _nombreController.text,
@@ -88,7 +135,6 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                   ),
                 );
               } else {
-                // Actualizar existente
                 await _service.updateCategoria(
                   categoria.idCategoria!,
                   Categoria(
@@ -113,17 +159,22 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // Título del cuadro de confirmación
         title: Text("Eliminar Categoría"),
         content: Text("¿Seguro que deseas eliminar '${categoria.nombre}'?"),
         actions: [
-          // Botón para cancelar y cerrar el cuadro
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancelar"),
+            child: Text("Cancelar", style: TextStyle(color: Color(0xFF4D0A0F))),
           ),
-          // Botón para confirmar la eliminación
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFBED6E3),
+              foregroundColor: Color(0xFF1B194B),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
             onPressed: () async {
               await _service.deleteCategoria(categoria.idCategoria!);
               Navigator.pop(context);
@@ -139,92 +190,112 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Fondo general de la pantalla
       backgroundColor: Color(0xFFF4F4F4),
-
-      // Barra superior de la pantalla (AppBar)
       appBar: AppBar(
-        backgroundColor: Color(0xFFE6F2F9), // Header
+        backgroundColor: Color(0xFFE6F2F9),
         title: Text(
           "Categorías",
-          style: TextStyle(color: Color(0xFF4D0A0F)), // Letras secciones
+          style: TextStyle(color: Color(0xFF4D0A0F)),
         ),
         iconTheme: IconThemeData(color: Color(0xFF1B194B)),
       ),
-
-      // Cuerpo de la pantalla con la lista de categorías
       body: FutureBuilder<List<Categoria>>(
         future: _futureCategorias,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting)
             return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
+          if (snapshot.hasError)
             return Center(child: Text("Error: ${snapshot.error}"));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty)
             return Center(child: Text("No hay categorías"));
-          }
 
-          // Lista completa de categorías obtenidas
           final categorias = snapshot.data!;
+          // Filtrar categorías por búsqueda
+          final query = _searchController.text.toLowerCase();
+          final filtered = categorias
+              .where((cat) =>
+                  cat.nombre.toLowerCase().contains(query) ||
+                  cat.descripcion.toLowerCase().contains(query))
+              .toList();
 
-          // Calcular el total de páginas
-          final totalPages = (categorias.length / _itemsPerPage).ceil();
-
-          // Calcular inicio y fin de los índices para mostrar solo 5 categorías por página
+          final totalPages = (filtered.length / _itemsPerPage).ceil();
           final startIndex = (_currentPage - 1) * _itemsPerPage;
-          final endIndex = (_currentPage * _itemsPerPage).clamp(0, categorias.length);
-          final categoriasPagina = categorias.sublist(startIndex, endIndex);
+          final endIndex = (_currentPage * _itemsPerPage).clamp(0, filtered.length);
+          final categoriasPagina = filtered.sublist(startIndex, endIndex);
 
           return Column(
             children: [
-              // Lista de categorías de la página actual
+              // Barra de búsqueda
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: "Buscar categoría...",
+                    prefixIcon: Icon(Icons.search, color: Color(0xFF1B194B)),
+                    filled: true,
+                    fillColor: Color(0xFFE6F2F9),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Botón de agregar categoría
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFBED6E3),
+                    foregroundColor: Color(0xFF1B194B),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: Icon(Icons.add),
+                  label: Text("Agregar Categoría",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  onPressed: () => _mostrarDialogo(),
+                ),
+              ),
+
+              // Lista de categorías
               Expanded(
                 child: ListView.builder(
                   itemCount: categoriasPagina.length,
                   itemBuilder: (context, index) {
                     final categoria = categoriasPagina[index];
                     return Card(
-                      elevation: 3, // Sombra ligera
+                      elevation: 3,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // Bordes redondeados
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espacio entre tarjetas
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        // Muestra el nombre y descripción de la categoría
                         title: Text(
                           categoria.nombre,
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Color(0xFF4D0A0F), // Letras secciones
-                          ),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color(0xFF4D0A0F)),
                         ),
                         subtitle: Text(
                           categoria.descripcion,
-                          style: TextStyle(
-                            color: Color(0xFF1B194B), // Letras de botones
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Color(0xFF1B194B), fontSize: 14),
                         ),
-                        // Acciones para editar o eliminar la categoría
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Botón para editar la categoría
                             IconButton(
-                              icon: Icon(Icons.edit, color: Color(0xFF1B194B)),
-                              tooltip: "Editar",
-                              onPressed: () => _mostrarDialogo(categoria: categoria),
-                            ),
-                            // Botón para eliminar la categoría
+                                icon: Icon(Icons.edit, color: Color(0xFF1B194B)),
+                                onPressed: () => _mostrarDialogo(categoria: categoria)),
                             IconButton(
-                              icon: Icon(Icons.delete, color: Color(0xFF4D0A0F)),
-                              tooltip: "Eliminar",
-                              onPressed: () => _confirmarEliminar(categoria),
-                            ),
+                                icon: Icon(Icons.delete, color: Color(0xFF4D0A0F)),
+                                onPressed: () => _confirmarEliminar(categoria)),
                           ],
                         ),
                       ),
@@ -233,7 +304,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                 ),
               ),
 
-              // Controles de paginación (botones con números)
+              // Paginación
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Wrap(
@@ -243,9 +314,9 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                     return ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _currentPage == page
-                            ? Color(0xFFA3B9C5) // Botón seleccionado
-                            : Color(0xFFBED6E3), // Fondo de botones
-                        foregroundColor: Color(0xFF1B194B), // Texto de los botones
+                            ? Color(0xFFA3B9C5)
+                            : Color(0xFFBED6E3),
+                        foregroundColor: Color(0xFF1B194B),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -260,17 +331,10 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                     );
                   }),
                 ),
-              )
+              ),
             ],
           );
         },
-      ),
-
-      // Botón flotante para agregar una nueva categoría
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFFBED6E3), // Fondo del botón
-        child: Icon(Icons.add, color: Color(0xFF1B194B)), // Icono
-        onPressed: () => _mostrarDialogo(),
       ),
     );
   }
