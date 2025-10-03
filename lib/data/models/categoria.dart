@@ -9,19 +9,27 @@ class Categoria {
     required this.descripcion,
   });
 
+  // Crear objeto desde JSON (respuesta de la API)
   factory Categoria.fromJson(Map<String, dynamic> json) {
     return Categoria(
-      idCategoria: json['IdCategoria'],
-      nombre: json['Nombre'],
-      descripcion: json['Descripcion'],
+      idCategoria: json['idCategoria'], 
+      nombre: json['nombre'],           
+      descripcion: json['descripcion'], 
     );
   }
 
+  // Convertir objeto a JSON (para enviar a la API)
   Map<String, dynamic> toJson() {
-    return {
-      "IdCategoria": idCategoria,
+    final Map<String, dynamic> data = {
       "Nombre": nombre,
       "Descripcion": descripcion,
     };
+
+    // Solo incluir IdCategoria si no es null (para actualizaciones)
+    if (idCategoria != null) {
+      data["IdCategoria"] = idCategoria; // Mantener int
+    }
+
+    return data;
   }
 }
