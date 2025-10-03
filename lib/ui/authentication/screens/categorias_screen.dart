@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../data/models/categoria.dart';
 import '../../../data/services/categoria_service.dart';
 
-
 // Pantalla principal para gestionar categorías
 class CategoriasScreen extends StatefulWidget {
   const CategoriasScreen({Key? key}) : super(key: key);
@@ -140,16 +139,32 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Barra superior de la pantalla
-      appBar: AppBar(title: Text("Categorías")),
+      // Fondo general de la pantalla
+      backgroundColor: Color(0xFFF4F4F4),
+
+      // Barra superior de la pantalla (AppBar)
+      appBar: AppBar(
+        backgroundColor: Color(0xFFE6F2F9), // Header
+        title: Text(
+          "Categorías",
+          style: TextStyle(color: Color(0xFF4D0A0F)), // Letras secciones
+        ),
+        iconTheme: IconThemeData(color: Color(0xFF1B194B)),
+      ),
 
       // Cuerpo de la pantalla con la lista de categorías
       body: FutureBuilder<List<Categoria>>(
         future: _futureCategorias,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
-          if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}"));
-          if (!snapshot.hasData || snapshot.data!.isEmpty) return Center(child: Text("No hay categorías"));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text("No hay categorías"));
+          }
 
           // Lista completa de categorías obtenidas
           final categorias = snapshot.data!;
@@ -171,22 +186,43 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                   itemBuilder: (context, index) {
                     final categoria = categoriasPagina[index];
                     return Card(
+                      elevation: 3, // Sombra ligera
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12), // Bordes redondeados
+                      ),
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espacio entre tarjetas
                       child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         // Muestra el nombre y descripción de la categoría
-                        title: Text(categoria.nombre),
-                        subtitle: Text(categoria.descripcion),
+                        title: Text(
+                          categoria.nombre,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFF4D0A0F), // Letras secciones
+                          ),
+                        ),
+                        subtitle: Text(
+                          categoria.descripcion,
+                          style: TextStyle(
+                            color: Color(0xFF1B194B), // Letras de botones
+                            fontSize: 14,
+                          ),
+                        ),
                         // Acciones para editar o eliminar la categoría
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // Botón para editar la categoría
                             IconButton(
-                              icon: Icon(Icons.edit, color: Colors.blue),
+                              icon: Icon(Icons.edit, color: Color(0xFF1B194B)),
+                              tooltip: "Editar",
                               onPressed: () => _mostrarDialogo(categoria: categoria),
                             ),
                             // Botón para eliminar la categoría
                             IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
+                              icon: Icon(Icons.delete, color: Color(0xFF4D0A0F)),
+                              tooltip: "Eliminar",
                               onPressed: () => _confirmarEliminar(categoria),
                             ),
                           ],
@@ -199,14 +235,21 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
 
               // Controles de paginación (botones con números)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Wrap(
                   spacing: 8,
                   children: List.generate(totalPages, (index) {
                     final page = index + 1;
                     return ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _currentPage == page ? Colors.blue : Colors.grey,
+                        backgroundColor: _currentPage == page
+                            ? Color(0xFFA3B9C5) // Botón seleccionado
+                            : Color(0xFFBED6E3), // Fondo de botones
+                        foregroundColor: Color(0xFF1B194B), // Texto de los botones
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                       onPressed: () {
                         setState(() {
@@ -225,8 +268,9 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
 
       // Botón flotante para agregar una nueva categoría
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xFFBED6E3), // Fondo del botón
+        child: Icon(Icons.add, color: Color(0xFF1B194B)), // Icono
         onPressed: () => _mostrarDialogo(),
-        child: Icon(Icons.add),
       ),
     );
   }
