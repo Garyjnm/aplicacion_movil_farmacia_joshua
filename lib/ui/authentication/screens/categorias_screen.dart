@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../data/models/categoria.dart';
 import '../../../data/services/categoria_service.dart';
 import '../../core/widgets/paginacion_controls.dart';
+import '../../core/widgets/custom_create_button.dart';
 
 // Pantalla principal para gestionar categorías
 class CategoriasScreen extends StatefulWidget {
@@ -255,19 +256,9 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
               // Botón de agregar categoría
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFBED6E3),
-                    foregroundColor: Color(0xFF1B194B),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: Icon(Icons.add),
-                  label: Text("Agregar Categoría",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  onPressed: () => _mostrarDialogo(),
+                child: CustomCreateButton(
+                  label: "Agregar Categoría", // Texto que quieras mostrar
+                  onPressed: () => _mostrarDialogo(), // Acción que hará el botón
                 ),
               ),
 
