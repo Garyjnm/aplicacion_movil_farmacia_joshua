@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/categoria.dart';
 import '../../../data/services/categoria_service.dart';
+import '../../core/widgets/paginacion_controls.dart';
 
 // Pantalla principal para gestionar categorías
 class CategoriasScreen extends StatefulWidget {
@@ -71,6 +72,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
       _descripcionController.clear();
     }
 
+    // Muestra el diálogo
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -97,6 +99,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
               ),
             ),
             SizedBox(height: 12),
+            // Campo para la descripción
             TextField(
               controller: _descripcionController,
               decoration: InputDecoration(
@@ -113,10 +116,12 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
           ],
         ),
         actions: [
+          // Botones Cancelar
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text("Cancelar", style: TextStyle(color: Color(0xFF4D0A0F))),
           ),
+          // Botón Guardar
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFBED6E3),
@@ -135,6 +140,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                   ),
                 );
               } else {
+                // Actualiza la categoría existente
                 await _service.updateCategoria(
                   categoria.idCategoria!,
                   Categoria(
@@ -162,10 +168,12 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         title: Text("Eliminar Categoría"),
         content: Text("¿Seguro que deseas eliminar '${categoria.nombre}'?"),
         actions: [
+          // Botón Cancelar
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text("Cancelar", style: TextStyle(color: Color(0xFF4D0A0F))),
           ),
+          // Botón Eliminar
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFBED6E3),
@@ -187,6 +195,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     );
   }
 
+  // Construye la interfaz de usuario de la pantalla 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -208,7 +217,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             return Center(child: Text("Error: ${snapshot.error}"));
           if (!snapshot.hasData || snapshot.data!.isEmpty)
             return Center(child: Text("No hay categorías"));
-
+          // Lista completa de categorías
           final categorias = snapshot.data!;
           // Filtrar categorías por búsqueda
           final query = _searchController.text.toLowerCase();
@@ -217,12 +226,12 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                   cat.nombre.toLowerCase().contains(query) ||
                   cat.descripcion.toLowerCase().contains(query))
               .toList();
-
+          // Cálculo de paginación y categorías a mostrar
           final totalPages = (filtered.length / _itemsPerPage).ceil();
           final startIndex = (_currentPage - 1) * _itemsPerPage;
           final endIndex = (_currentPage * _itemsPerPage).clamp(0, filtered.length);
           final categoriasPagina = filtered.sublist(startIndex, endIndex);
-
+          // UI de la pantalla
           return Column(
             children: [
               // Barra de búsqueda
@@ -262,7 +271,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                 ),
               ),
 
-              // Lista de categorías
+              // Lista de categorías paginada
               Expanded(
                 child: ListView.builder(
                   itemCount: categoriasPagina.length,
@@ -290,9 +299,11 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Botón Editar
                             IconButton(
                                 icon: Icon(Icons.edit, color: Color(0xFF1B194B)),
                                 onPressed: () => _mostrarDialogo(categoria: categoria)),
+                            // Botón Eliminar
                             IconButton(
                                 icon: Icon(Icons.delete, color: Color(0xFF4D0A0F)),
                                 onPressed: () => _confirmarEliminar(categoria)),
@@ -307,31 +318,17 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
               // Paginación
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Wrap(
-                  spacing: 8,
-                  children: List.generate(totalPages, (index) {
-                    final page = index + 1;
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _currentPage == page
-                            ? Color(0xFFA3B9C5)
-                            : Color(0xFFBED6E3),
-                        foregroundColor: Color(0xFF1B194B),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPage = page;
-                        });
-                      },
-                      child: Text("$page"),
-                    );
-                  }),
+                child: PaginacionControls(
+                  currentPage: _currentPage,
+                  totalPages: totalPages,
+                  onPageChanged: (page) {
+                    setState(() {
+                      _currentPage = page;
+                    });
+                  },
                 ),
               ),
+
             ],
           );
         },
