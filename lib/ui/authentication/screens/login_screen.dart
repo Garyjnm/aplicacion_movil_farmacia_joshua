@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../data/repositories/auth_repository.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,9 +9,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  final AuthRepository _authRepository = AuthRepository(); //inicializamos el repositorio, la capa que vamos a usar
+
   final TextEditingController _usernameController = TextEditingController(text: '',); //este controlador nos permite obtener el texto del campo de usuario
   final TextEditingController _passwordController = TextEditingController(); //este controlador nos permite obtener el texto del campo de contraseña
 
+  bool _isLoading = false; //nuevo estado para controlar la animación del botón
+  
   @override
   void dispose() {
     _usernameController
@@ -20,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     final username = _usernameController.text; //obtenemos el texto del campo de usuario
     final password = _passwordController.text; //obtenemos el texto del campo de contraseña
 
@@ -35,6 +41,42 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
+
+    setState(() {
+      _isLoading = true; //iniciamos el estado de carga y deshabilitamos el botón
+    });
+
+    try{
+      final authResponse = await _authRepository.login(username, password);
+
+      if (!mounted) return; //verificamos que el widget aún esté en el árbol de widgets
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!'),
+          backgroundColor: Colors.teal,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      
+    }catch(e){
+      if (!mounted) return; //verificamos que el widget aún esté en el árbol de widgets
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString().replaceFirst('Exception: ', '')}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        )
+      );
+    }finally{
+      if (mounted) { 
+        setState(() {
+          _isLoading = false; //finalizamos el estado de carga y habilitamos el botón
+        });
+      } 
+    }
+    
   }
 
   @override
@@ -89,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // ------Boton de login---------
               ElevatedButton(
-                onPressed: _login, //llama a la función _login cuando se presiona el botón
+                onPressed: _isLoading ? null :_login, //llama a la función _login cuando se presiona el botón
                 style: ElevatedButton.styleFrom( //estilo del botón
                   backgroundColor: Colors.teal, //color de prueba del fondo del botón de
                   foregroundColor: Colors.white, //color de prueba del texto del botón
@@ -99,12 +141,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   elevation: 2,//sombra del botón
                 ),
-                child: const Text(
-                  'Ingresar',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),//estilo del texto del botón
-                ),
-              ),
-              const SizedBox(height: 16),//espacio entre el botón login y el link "olvidó contraseña"
+                child: _isLoading
+                    // Mostrar CircularProgressIndicator mientras carga
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3,
+                        ),
+                      )
+                    : const Text( 
+                        'Ingresar', 
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+               ), 
+               const SizedBox(height: 16),
 
               // ------Link de olvido contraseña (de momento no estara funcional)---------
               TextButton(
