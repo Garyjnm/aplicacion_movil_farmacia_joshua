@@ -5,19 +5,6 @@ import 'ui/core/themes/light_theme.dart';
 import 'ui/core/themes/dark_theme.dart';
 import 'ui/authentication/screens/home_page.dart';
 
-// class MyApp extends StatefulWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Farmacia Joshua',
-//       theme: ThemeData(primarySwatch: Colors.teal, fontFamily: 'Roboto'),
-//       home: const LoginScreen(),
-//       debugShowCheckedModeBanner: false,
-//     );
-//   }
-// }
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
