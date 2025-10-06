@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../data/repositories/auth_repository.dart';
+import 'package:auto_route/auto_route.dart';
 
+@RoutePage()
 class LoginScreen extends StatefulWidget {
+  static const String routeName = '/login';
   const LoginScreen({super.key});
 
   @override
@@ -51,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return; //verificamos que el widget aún esté en el árbol de widgets
 
+      //-----------Mensaje para cuando el login es correcto-----------
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!'),
