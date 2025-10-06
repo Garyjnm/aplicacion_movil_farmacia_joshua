@@ -63,7 +63,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     setState(() {});
   }
 
-  // 🔹 Diálogo Agregar / Editar Categoría
+  //  Diálogo Agregar / Editar Categoría
   void _mostrarDialogo({Categoria? categoria}) {
     if (categoria != null) {
       _nombreController.text = categoria.nombre;
@@ -107,7 +107,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     );
   }
 
-  // 🔹 Confirmar eliminación
+  // Confirmar eliminación
   void _confirmarEliminar(Categoria categoria) {
     final colors = Theme.of(context).colorScheme;
 
@@ -149,13 +149,13 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
       ),
       body: Column(
         children: [
-          // 🔹 Campo de búsqueda
+          // Campo de búsqueda
           Padding(
             padding: const EdgeInsets.all(16.0),
             child:
                 CustomTextField(controller: _searchController, label: "Buscar categoría..."),
           ),
-          // 🔹 Botón agregar
+          // Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: CustomCreateButton(
@@ -163,7 +163,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
               onPressed: () => _mostrarDialogo(),
             ),
           ),
-          // 🔹 Lista de categorías
+          //  Lista de categorías
           Expanded(
             child: _filteredCategorias.isEmpty
                 ? Center(child: Text("No hay categorías", style: fonts.bodyMedium))
@@ -200,7 +200,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                     },
                   ),
           ),
-          // 🔹 Controles de paginación
+          //  Controles de paginación
           if (totalPages > 1)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
