@@ -11,7 +11,7 @@ class CategoriasScreen extends StatefulWidget {
   const CategoriasScreen({Key? key}) : super(key: key);
 
   @override
-  _CategoriasScreenState createState() => _CategoriasScreenState();
+  State<CategoriasScreen> createState() => _CategoriasScreenState();
 }
 
 class _CategoriasScreenState extends State<CategoriasScreen> {
@@ -25,7 +25,6 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   int _currentPage = 1;
   final int _itemsPerPage = 5;
 
-  // Listas para filtrado
   List<Categoria> _allCategorias = [];
   List<Categoria> _filteredCategorias = [];
 
@@ -33,8 +32,6 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   void initState() {
     super.initState();
     _loadCategorias();
-
-    // Escucha cambios en la búsqueda
     _searchController.addListener(_filterCategorias);
   }
 
@@ -51,7 +48,6 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     _loadCategorias();
   }
 
-  // Filtrado de categorías
   void _filterCategorias() {
     final query = _searchController.text.toLowerCase();
     if (query.isEmpty) {
@@ -63,11 +59,11 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
               cat.descripcion.toLowerCase().contains(query))
           .toList();
     }
-    _currentPage = 1; // Reinicia la paginación
+    _currentPage = 1;
     setState(() {});
   }
 
-  // Diálogo agregar/editar
+  // 🔹 Diálogo Agregar / Editar Categoría
   void _mostrarDialogo({Categoria? categoria}) {
     if (categoria != null) {
       _nombreController.text = categoria.nombre;
@@ -88,47 +84,30 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
           CustomTextField(controller: _descripcionController, label: "Descripción"),
         ],
       ),
-      actions: [
-        // Botón cancelar
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            "Cancelar",
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-          ),
-        ),
-        // Botón guardar
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-          onPressed: () async {
-            if (categoria == null) {
-              await _service.addCategoria(Categoria(
-                nombre: _nombreController.text,
-                descripcion: _descripcionController.text,
-              ));
-            } else {
-              await _service.updateCategoria(
-                categoria.idCategoria!,
-                Categoria(
-                  idCategoria: categoria.idCategoria,
-                  nombre: _nombreController.text,
-                  descripcion: _descripcionController.text,
-                ),
-              );
-            }
-            Navigator.pop(context);
-            _refresh();
-          },
-          child: const Text("Guardar"),
-        ),
-      ],
+      onSave: () async {
+        if (categoria == null) {
+          await _service.addCategoria(
+            Categoria(
+              nombre: _nombreController.text,
+              descripcion: _descripcionController.text,
+            ),
+          );
+        } else {
+          await _service.updateCategoria(
+            categoria.idCategoria!,
+            Categoria(
+              idCategoria: categoria.idCategoria,
+              nombre: _nombreController.text,
+              descripcion: _descripcionController.text,
+            ),
+          );
+        }
+        _refresh();
+      },
     );
   }
 
-  // Confirmación eliminar
+  // 🔹 Confirmar eliminación
   void _confirmarEliminar(Categoria categoria) {
     final colors = Theme.of(context).colorScheme;
 
@@ -139,24 +118,11 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         "¿Seguro que deseas eliminar '${categoria.nombre}'?",
         style: TextStyle(color: colors.onSurface),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text("Cancelar", style: TextStyle(color: colors.primary)),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colors.primaryContainer,
-            foregroundColor: colors.onPrimaryContainer,
-          ),
-          onPressed: () async {
-            await _service.deleteCategoria(categoria.idCategoria!);
-            Navigator.pop(context);
-            _refresh();
-          },
-          child: const Text("Eliminar"),
-        ),
-      ],
+      onSave: () async {
+        await _service.deleteCategoria(categoria.idCategoria!);
+        _refresh();
+      },
+      saveLabel: "Eliminar",
     );
   }
 
@@ -165,10 +131,10 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     final colors = Theme.of(context).colorScheme;
     final fonts = Theme.of(context).textTheme;
 
-    // Paginación
     final totalPages = (_filteredCategorias.length / _itemsPerPage).ceil();
     final startIndex = (_currentPage - 1) * _itemsPerPage;
-    final endIndex = (_currentPage * _itemsPerPage).clamp(0, _filteredCategorias.length);
+    final endIndex =
+        (_currentPage * _itemsPerPage).clamp(0, _filteredCategorias.length);
     final categoriasPagina = _filteredCategorias.sublist(startIndex, endIndex);
 
     return Scaffold(
@@ -183,12 +149,13 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
       ),
       body: Column(
         children: [
-          // Campo de búsqueda
+          // 🔹 Campo de búsqueda
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: CustomTextField(controller: _searchController, label: "Buscar categoría..."),
+            child:
+                CustomTextField(controller: _searchController, label: "Buscar categoría..."),
           ),
-          // Botón agregar
+          // 🔹 Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: CustomCreateButton(
@@ -196,7 +163,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
               onPressed: () => _mostrarDialogo(),
             ),
           ),
-          // Lista de categorías
+          // 🔹 Lista de categorías
           Expanded(
             child: _filteredCategorias.isEmpty
                 ? Center(child: Text("No hay categorías", style: fonts.bodyMedium))
@@ -206,10 +173,15 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                       final categoria = categoriasPagina[index];
                       return CustomCard(
                         child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          title: Text(categoria.nombre,
-                              style: fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-                          subtitle: Text(categoria.descripcion, style: fonts.bodyMedium),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          title: Text(
+                            categoria.nombre,
+                            style:
+                                fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle:
+                              Text(categoria.descripcion, style: fonts.bodyMedium),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -228,7 +200,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                     },
                   ),
           ),
-          // Controles de paginación
+          // 🔹 Controles de paginación
           if (totalPages > 1)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
