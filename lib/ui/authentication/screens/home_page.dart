@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/themes/theme_provider.dart';
 import '../../../sidebar_widget.dart';
+import 'package:auto_route/auto_route.dart';
 
+@RoutePage()
 // La nueva clase HomeScreen que usa Riverpod (ConsumerWidget)
 class HomePage extends ConsumerWidget {
+  static const String routeName = '/home';
   const HomePage({super.key});
 
   // La lógica del cambio de tema se integra directamente aquí, 
