@@ -1,4 +1,4 @@
-import 'ui/authentication/screens/categorias_screen.dart';
+// import 'ui/authentication/screens/categorias_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ui/core/themes/theme_provider.dart';

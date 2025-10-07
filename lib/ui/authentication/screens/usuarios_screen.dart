@@ -41,8 +41,8 @@
 //   final int _itemsPerPage = 5; // Cuántos usuarios mostrar por página
 
 //   // Listas donde se guardarán todos los usuarios y los filtrados
-//   // List<Usuario> _allUsuarios = []; // Lista completa
-//   // List<Usuario> _filteredUsuarios = []; // Lista filtrada según búsqueda
+//   List<Usuario> _allUsuarios = []; // Lista completa
+//   List<Usuario> _filteredUsuarios = []; // Lista filtrada según búsqueda
 
 //   // Método que se ejecuta al inicializar el widget
 //   @override
@@ -72,38 +72,38 @@
 //   void _filterUsuarios() {
 //     final query = _searchController.text.toLowerCase(); // Convierte el texto a minúsculas
 //     setState(() {
-//       // _filteredUsuarios = _allUsuarios.where((u) { // Filtra cada usuario
-//       //   return u.nombres.toLowerCase().contains(query) || // Coincide en nombres
-//       //          u.apellidos.toLowerCase().contains(query) || // Coincide en apellidos
-//       //          u.nombreUsuario.toLowerCase().contains(query); // Coincide en usuario
-//       // }).toList(); // Devuelve la nueva lista filtrada
+//       _filteredUsuarios = _allUsuarios.where((u) { // Filtra cada usuario
+//         return u.nombres.toLowerCase().contains(query) || // Coincide en nombres
+//                u.apellidos.toLowerCase().contains(query) || // Coincide en apellidos
+//                u.nombreUsuario.toLowerCase().contains(query); // Coincide en usuario
+//       }).toList(); // Devuelve la nueva lista filtrada
 //       _currentPage = 1; // Reinicia a la primera página después de filtrar
 //     });
 //   }
 
-//   // Método que muestra el diálogo de agregar o editar usuario
-//   // void _mostrarDialogo({Usuario? usuario}) {
-//   //   if (usuario != null) { // Si se recibe un usuario, es edición
-//   //     _nombresController.text = usuario.nombres; // Llena el campo nombres
-//   //     _apellidosController.text = usuario.apellidos; // Llena apellidos
-//   //     _nombreUsuarioController.text = usuario.nombreUsuario; // Llena nombre de usuario
-//   //     _contraseñaController.clear(); // Limpia la contraseña (no se muestra)
-//   //     _idRolController.text = usuario.idRol.toString(); // Llena el rol
-//   //   } else { // Si es nuevo usuario
-//   //     _nombresController.clear(); // Limpia los campos
-//   //     _apellidosController.clear();
-//   //     _nombreUsuarioController.clear();
-//   //     _contraseñaController.clear();
-//   //     _idRolController.clear();
-//   //   }
+//  // Método que muestra el diálogo de agregar o editar usuario
+//   void _mostrarDialogo({Usuario? usuario}) {
+//     if (usuario != null) { // Si se recibe un usuario, es edición
+//       _nombresController.text = usuario.nombres; // Llena el campo nombres
+//       _apellidosController.text = usuario.apellidos; // Llena apellidos
+//       _nombreUsuarioController.text = usuario.nombreUsuario; // Llena nombre de usuario
+//       _contraseñaController.clear(); // Limpia la contraseña (no se muestra)
+//       _idRolController.text = usuario.idRol.toString(); // Llena el rol
+//     } else { // Si es nuevo usuario
+//       _nombresController.clear(); // Limpia los campos
+//       _apellidosController.clear();
+//       _nombreUsuarioController.clear();
+//       _contraseñaController.clear();
+//       _idRolController.clear();
+//     }
 
-//   //   // Muestra el diálogo personalizado
-//   //   showCustomDialog(
-//   //     context: context,
-//   //     title: usuario == null ? "Agregar Usuario" : "Editar Usuario", // Título dinámico
-//   //     content: Column( // Contenido del diálogo
-//   //       mainAxisSize: MainAxisSize.min, // Ajusta tamaño según contenido
-//   //       children: [
+//     // Muestra el diálogo personalizado
+//     showCustomDialog(
+//       context: context,
+//       title: usuario == null ? "Agregar Usuario" : "Editar Usuario", // Título dinámico
+//       content: Column( // Contenido del diálogo
+//         mainAxisSize: MainAxisSize.min, // Ajusta tamaño según contenido
+//         children: [
 //           CustomTextField(controller: _nombresController, label: "Nombres"), // Campo para nombres
 //           const SizedBox(height: 12), // Espacio
 //           CustomTextField(controller: _apellidosController, label: "Apellidos"), // Campo apellidos

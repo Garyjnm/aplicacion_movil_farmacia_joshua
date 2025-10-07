@@ -6,8 +6,11 @@ import '../../core/widgets/custom_create_button.dart';
 import '../../core/widgets/custom_card.dart';
 import '../../core/widgets/custom_textfield.dart';
 import '../../core/widgets/custom_dialog.dart';
+import 'package:auto_route/auto_route.dart';
 
+@RoutePage()
 class CategoriasScreen extends StatefulWidget {
+  static const String routeName = '/categorias';
   const CategoriasScreen({Key? key}) : super(key: key);
 
   @override
