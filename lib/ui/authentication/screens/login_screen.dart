@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'package:auto_route/auto_route.dart';
+import './home_page.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -62,6 +63,8 @@ class _LoginScreenState extends State<LoginScreen> {
           duration: const Duration(seconds: 3),
         ),
       );
+
+      context.router.replacePath(HomePage.routeName); //navegamos a la pantalla de inicio y reemplazamos la pantalla de login
       
     }catch(e){
       if (!mounted) return; //verificamos que el widget aún esté en el árbol de widgets
