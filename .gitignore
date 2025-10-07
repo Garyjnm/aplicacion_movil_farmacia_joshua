@@ -133,5 +133,6 @@ coverage/
 **/GeneratedPluginRegistrant.*
 **/generated_plugin_registrant.*
 **/generated_plugins.cmake
+*.gr.dart
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,flutter
