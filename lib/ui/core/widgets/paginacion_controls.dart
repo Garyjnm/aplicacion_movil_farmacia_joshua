@@ -13,17 +13,14 @@ class PaginacionControls extends StatelessWidget {
   }) : super(key: key);
 
   List<int> _getVisiblePages() {
-    const int maxVisible = 5; // Cuántos botones de número mostrar
+    const int maxVisible = 5; // Máximo de botones visibles
     int startPage = (currentPage - 2).clamp(1, totalPages);
     int endPage = (currentPage + 2).clamp(1, totalPages);
 
-    // Ajuste si estamos cerca del inicio
     if (currentPage <= 3) {
       startPage = 1;
       endPage = totalPages > maxVisible ? maxVisible : totalPages;
-    }
-    // Ajuste si estamos cerca del final
-    else if (currentPage >= totalPages - 2) {
+    } else if (currentPage >= totalPages - 2) {
       endPage = totalPages;
       startPage = totalPages - (maxVisible - 1) > 0
           ? totalPages - (maxVisible - 1)
@@ -38,23 +35,21 @@ class PaginacionControls extends StatelessWidget {
     final visiblePages = _getVisiblePages();
 
     return Wrap(
-      spacing: 6,
+      spacing: 4,
       alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        // Botón "Anterior"
         if (currentPage > 1)
           _buildButton(
             label: "<",
             onPressed: () => onPageChanged(currentPage - 1),
           ),
 
-        // Primera página y puntos suspensivos
         if (!visiblePages.contains(1)) ...[
           _buildButton(label: "1", onPressed: () => onPageChanged(1)),
-          const Text("..."),
+          const Text("...", style: TextStyle(fontSize: 12)),
         ],
 
-        // Páginas visibles
         for (var page in visiblePages)
           _buildButton(
             label: "$page",
@@ -62,15 +57,14 @@ class PaginacionControls extends StatelessWidget {
             onPressed: () => onPageChanged(page),
           ),
 
-        // Última página y puntos suspensivos
         if (!visiblePages.contains(totalPages)) ...[
-          const Text("..."),
+          const Text("...", style: TextStyle(fontSize: 12)),
           _buildButton(
-              label: "$totalPages",
-              onPressed: () => onPageChanged(totalPages)),
+            label: "$totalPages",
+            onPressed: () => onPageChanged(totalPages),
+          ),
         ],
 
-        // Botón "Siguiente"
         if (currentPage < totalPages)
           _buildButton(
             label: ">",
@@ -85,18 +79,27 @@ class PaginacionControls extends StatelessWidget {
     bool isActive = false,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor:
-            isActive ? const Color(0xFFA3B9C5) : const Color(0xFFBED6E3),
-        foregroundColor: const Color(0xFF1B194B),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+    return SizedBox(
+      height: 32,
+      width: 32,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              isActive ? const Color(0xFFA3B9C5) : const Color(0xFFBED6E3),
+          foregroundColor: const Color(0xFF1B194B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          minimumSize: const Size(30, 30),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
       ),
-      onPressed: onPressed,
-      child: Text(label),
     );
   }
 }
