@@ -16,7 +16,6 @@ class RolesScreens extends StatefulWidget {
 
 class _RolesScreenState extends State<RolesScreens> {
   final RolesServices _service = RolesServices();
-  late Future<List<Roles>> _futureRoles;
 
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
@@ -28,6 +27,20 @@ class _RolesScreenState extends State<RolesScreens> {
   List<Roles> _allRoles = [];
   List<Roles> _filteredRoles = [];
 
+  // Roles de ejemplo por defecto
+  final List<Map<String, String>> _rolesEjemplo = [
+    {
+      "nombre": "Administrador",
+      "descripcion":
+          "Tiene acceso total al sistema: gestiona usuarios, inventario, reportes y configuraciones.",
+    },
+    {
+      "nombre": "Vendedor",
+      "descripcion":
+          "Encargado de las ventas y atención al cliente. Puede consultar productos y registrar ventas.",
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -35,18 +48,51 @@ class _RolesScreenState extends State<RolesScreens> {
     _searchController.addListener(_filterRoles);
   }
 
-  void _loadRoles() {
-    _futureRoles = _service.getRol();
-    _futureRoles.then((data) {
-      _allRoles = data;
-      _filteredRoles = List.from(_allRoles);
-      setState(() {});
-    });
+  // Cargar roles desde la API o usar roles de ejemplo
+  Future<void> _loadRoles() async {
+    print("loadRoles iniciado");
+
+    try {
+      final data = await _service.getRol();
+      print("Datos de la API recibidos: $data");
+
+      if (data.isEmpty) {
+        print("⚠️ No hay datos desde la API. Usando roles de ejemplo.");
+        _allRoles = _rolesEjemplo
+            .asMap()
+            .entries
+            .map(
+              (entry) => Roles(
+                idRol: entry.key + 1,
+                nombre: entry.value["nombre"]!,
+                descripcion: entry.value["descripcion"]!,
+              ),
+            )
+            .toList();
+      } else {
+        _allRoles = data;
+      }
+    } catch (e) {
+      print("Error al obtener roles: $e");
+      _allRoles = _rolesEjemplo
+          .asMap()
+          .entries
+          .map(
+            (entry) => Roles(
+              idRol: entry.key + 1,
+              nombre: entry.value["nombre"]!,
+              descripcion: entry.value["descripcion"]!,
+            ),
+          )
+          .toList();
+    }
+
+    print("Lista final de roles: $_allRoles");
+    _filteredRoles = List.from(_allRoles);
+    setState(() {});
   }
 
-  void _refresh() {
-    _loadRoles();
-  }
+  void _refresh() => _loadRoles();
 
   void _filterRoles() {
     final query = _searchController.text.toLowerCase();
@@ -55,9 +101,9 @@ class _RolesScreenState extends State<RolesScreens> {
     } else {
       _filteredRoles = _allRoles
           .where(
-            (cat) =>
-                cat.nombre.toLowerCase().contains(query) ||
-                cat.descripcion.toLowerCase().contains(query),
+            (r) =>
+                r.nombre.toLowerCase().contains(query) ||
+                r.descripcion.toLowerCase().contains(query),
           )
           .toList();
     }
@@ -65,7 +111,7 @@ class _RolesScreenState extends State<RolesScreens> {
     setState(() {});
   }
 
-  //  Diálogo Agregar / Editar
+  // Mostrar diálogo de agregar/editar rol
   void _mostrarDialogo({Roles? roles}) {
     if (roles != null) {
       _nombreController.text = roles.nombre;
@@ -77,7 +123,7 @@ class _RolesScreenState extends State<RolesScreens> {
 
     showCustomDialog(
       context: context,
-      title: roles == null ? "Agregar Roles" : "Editar Roles",
+      title: roles == null ? "Agregar Rol" : "Editar Rol",
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -156,7 +202,6 @@ class _RolesScreenState extends State<RolesScreens> {
       ),
       body: Column(
         children: [
-          // Campo de búsqueda
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: CustomTextField(
@@ -164,18 +209,21 @@ class _RolesScreenState extends State<RolesScreens> {
               label: "Buscar Roles...",
             ),
           ),
-          // Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: CustomCreateButton(
-              label: "Agregar Roles",
+              label: "Agregar Rol",
               onPressed: () => _mostrarDialogo(),
             ),
           ),
-          //  Lista de Roles
           Expanded(
             child: _filteredRoles.isEmpty
-                ? Center(child: Text("No hay Roles", style: fonts.bodyMedium))
+                ? Center(
+                    child: Text(
+                      "No hay roles disponibles",
+                      style: fonts.bodyMedium,
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: rolesPagina.length,
                     itemBuilder: (context, index) {
@@ -192,10 +240,7 @@ class _RolesScreenState extends State<RolesScreens> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          subtitle: Text(
-                            roles.descripcion,
-                            style: fonts.bodyMedium,
-                          ),
+                          subtitle: Text(roles.descripcion),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -214,7 +259,6 @@ class _RolesScreenState extends State<RolesScreens> {
                     },
                   ),
           ),
-          //  Controles de paginación
           if (totalPages > 1)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -222,9 +266,7 @@ class _RolesScreenState extends State<RolesScreens> {
                 currentPage: _currentPage,
                 totalPages: totalPages,
                 onPageChanged: (page) {
-                  setState(() {
-                    _currentPage = page;
-                  });
+                  setState(() => _currentPage = page);
                 },
               ),
             ),

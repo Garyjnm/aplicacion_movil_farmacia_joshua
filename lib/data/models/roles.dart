@@ -8,9 +8,9 @@ class Roles {
   // Crear objeto desde JSON (respuesta de la API)
   factory Roles.fromJson(Map<String, dynamic> json) {
     return Roles(
-      idRol: json['idRoles'],
-      nombre: json['nombre'],
-      descripcion: json['descripcion'],
+      idRol: json['idRol'] ?? json['IdRol'], // <-- corrección aquí
+      nombre: json['nombre'] ?? json['Nombre'],
+      descripcion: json['descripcion'] ?? json['Descripcion'],
     );
   }
 
@@ -21,7 +21,7 @@ class Roles {
       "Descripcion": descripcion,
     };
 
-    // Solo incluir IdCategoria si no es null (para actualizaciones)
+    // Solo incluir IdRoles si no es null (para actualizaciones)
     if (idRol != null) {
       data["IdRol"] = idRol; // Mantener int
     }
