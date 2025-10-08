@@ -127,6 +127,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
       },
       saveLabel: "Eliminar",
     );
+  
   }
 
   @override
