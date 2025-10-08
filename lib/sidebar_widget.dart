@@ -1,3 +1,4 @@
+import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/usuarios_screen.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/categorias_screen.dart';
 
@@ -77,7 +78,20 @@ class SidebarWidget extends StatelessWidget {
           ),
           //Clientes
           ListTile(leading: Icon(Icons.list), title: Text("Clientes")),
-          ListTile(leading: Icon(Icons.people), title: Text("Usuarios")),
+          ListTile(
+           leading: const Icon(Icons.people),
+            title: const Text("Usuarios"),
+            onTap: () {
+           Navigator.pop(context); // 👈 Cierra el Drawer
+             Navigator.push(
+                context,
+                   MaterialPageRoute(
+                      builder: (context) => const UsuariosScreen(),
+                   ),
+             );
+             },
+        ),
+
           //Configuracion
           ListTile(leading: Icon(Icons.settings), title: Text("Configuracion")),
           ListTile(leading: Icon(Icons.help), title: Text("Soporte")),
