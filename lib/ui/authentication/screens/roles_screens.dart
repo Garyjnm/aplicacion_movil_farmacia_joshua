@@ -1,194 +1,234 @@
 import 'package:flutter/material.dart';
+import '../../../data/models/roles.dart';
+import '../../../data/services/roles_services.dart';
+import '../../core/widgets/paginacion_controls.dart';
+import '../../core/widgets/custom_create_button.dart';
+import '../../core/widgets/custom_card.dart';
+import '../../core/widgets/custom_textfield.dart';
+import '../../core/widgets/custom_dialog.dart';
 
-class RolesScreen extends StatefulWidget {
-  const RolesScreen({super.key});
+class RolesScreens extends StatefulWidget {
+  const RolesScreens({Key? key}) : super(key: key);
 
   @override
-  State<RolesScreen> createState() => _RolesScreenState();
+  State<RolesScreens> createState() => _RolesScreenState();
 }
 
-class _RolesScreenState extends State<RolesScreen> {
+class _RolesScreenState extends State<RolesScreens> {
+  final RolesServices _service = RolesServices();
+  late Future<List<Roles>> _futureRoles;
+
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
-  final List<Map<String, String>> _roles = [
-    {
-      "nombre": "Administrador",
-      "descripcion":
-          "Tiene acceso total al sistema: gestiona usuarios, inventario, reportes y configuraciones.",
-      "permiso": "Control Total",
-    },
-    {
-      "nombre": "Vendedor",
-      "descripcion":
-          "Encargado de las ventas y atención al cliente. Puede consultar productos y registrar ventas.",
-      "permiso": "Ventas",
-    },
-  ];
+  int _currentPage = 1;
+  final int _itemsPerPage = 5;
 
-  String _searchQuery = "";
+  List<Roles> _allRoles = [];
+  List<Roles> _filteredRoles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoles();
+    _searchController.addListener(_filterRoles);
+  }
+
+  void _loadRoles() {
+    _futureRoles = _service.getRol();
+    _futureRoles.then((data) {
+      _allRoles = data;
+      _filteredRoles = List.from(_allRoles);
+      setState(() {});
+    });
+  }
+
+  void _refresh() {
+    _loadRoles();
+  }
+
+  void _filterRoles() {
+    final query = _searchController.text.toLowerCase();
+    if (query.isEmpty) {
+      _filteredRoles = List.from(_allRoles);
+    } else {
+      _filteredRoles = _allRoles
+          .where(
+            (cat) =>
+                cat.nombre.toLowerCase().contains(query) ||
+                cat.descripcion.toLowerCase().contains(query),
+          )
+          .toList();
+    }
+    _currentPage = 1;
+    setState(() {});
+  }
+
+  //  Diálogo Agregar / Editar
+  void _mostrarDialogo({Roles? roles}) {
+    if (roles != null) {
+      _nombreController.text = roles.nombre;
+      _descripcionController.text = roles.descripcion;
+    } else {
+      _nombreController.clear();
+      _descripcionController.clear();
+    }
+
+    showCustomDialog(
+      context: context,
+      title: roles == null ? "Agregar Roles" : "Editar Roles",
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(controller: _nombreController, label: "Nombre"),
+          const SizedBox(height: 12),
+          CustomTextField(
+            controller: _descripcionController,
+            label: "Descripción",
+          ),
+        ],
+      ),
+      onSave: () async {
+        if (roles == null) {
+          await _service.addRol(
+            Roles(
+              nombre: _nombreController.text,
+              descripcion: _descripcionController.text,
+            ),
+          );
+        } else {
+          await _service.updateRol(
+            roles.idRol!,
+            Roles(
+              idRol: roles.idRol,
+              nombre: _nombreController.text,
+              descripcion: _descripcionController.text,
+            ),
+          );
+        }
+        _refresh();
+      },
+    );
+  }
+
+  // Confirmar eliminación
+  void _confirmarEliminar(Roles roles) {
+    final colors = Theme.of(context).colorScheme;
+
+    showCustomDialog(
+      context: context,
+      title: "Eliminar Rol",
+      content: Text(
+        "¿Seguro que deseas eliminar '${roles.nombre}'?",
+        style: TextStyle(color: colors.onSurface),
+      ),
+      onSave: () async {
+        await _service.deleteRol(roles.idRol!);
+        _refresh();
+      },
+      saveLabel: "Eliminar",
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final fonts = Theme.of(context).textTheme;
 
-    // Filtrar roles según la búsqueda
-    final filteredRoles = _roles
-        .where(
-          (rol) =>
-              rol["nombre"]!.toLowerCase().contains(_searchQuery.toLowerCase()),
-        )
-        .toList();
+    final totalPages = (_filteredRoles.length / _itemsPerPage).ceil();
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    final endIndex = (_currentPage * _itemsPerPage).clamp(
+      0,
+      _filteredRoles.length,
+    );
+    final rolesPagina = _filteredRoles.sublist(startIndex, endIndex);
 
     return Scaffold(
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: colors.primary,
-        title: TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: "Buscar rol...",
-            border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.black87),
-          ),
-          style: const TextStyle(color: Colors.black87),
-          cursorColor: Colors.black87,
-          onChanged: (value) {
-            setState(() {
-              _searchQuery = value;
-            });
-          },
+        backgroundColor: colors.primaryContainer,
+        title: Text(
+          "Roles",
+          style: fonts.titleMedium?.copyWith(color: colors.onPrimaryContainer),
         ),
-        centerTitle: true,
-        elevation: 4,
+        iconTheme: IconThemeData(color: colors.onPrimaryContainer),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: filteredRoles.isEmpty
-            ? Center(
-                child: Text(
-                  "No se encontraron roles",
-                  style: fonts.bodyLarge?.copyWith(
-                    color: colors.onSurface.withOpacity(0.6),
-                  ),
-                ),
-              )
-            : ListView.separated(
-                itemCount: filteredRoles.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  final rol = filteredRoles[index];
-
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: Card(
-                      elevation: 6,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      shadowColor: colors.primary.withOpacity(0.3),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        leading: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black87, width: 2),
+      body: Column(
+        children: [
+          // Campo de búsqueda
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: CustomTextField(
+              controller: _searchController,
+              label: "Buscar Roles...",
+            ),
+          ),
+          // Botón agregar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: CustomCreateButton(
+              label: "Agregar Roles",
+              onPressed: () => _mostrarDialogo(),
+            ),
+          ),
+          //  Lista de Roles
+          Expanded(
+            child: _filteredRoles.isEmpty
+                ? Center(child: Text("No hay Roles", style: fonts.bodyMedium))
+                : ListView.builder(
+                    itemCount: rolesPagina.length,
+                    itemBuilder: (context, index) {
+                      final roles = rolesPagina[index];
+                      return CustomCard(
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                          child: CircleAvatar(
-                            radius: 23,
-                            backgroundColor: colors.primary.withOpacity(0.1),
-                            child: Icon(
-                              rol["nombre"] == "Administrador"
-                                  ? Icons.admin_panel_settings
-                                  : Icons.storefront_rounded,
-                              color: colors.onSurface,
-                              size: 25,
+                          title: Text(
+                            roles.nombre,
+                            style: fonts.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                        title: Text(
-                          rol["nombre"]!,
-                          style: fonts.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colors.onSurface,
+                          subtitle: Text(
+                            roles.descripcion,
+                            style: fonts.bodyMedium,
                           ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                rol["descripcion"]!,
-                                style: fonts.bodyMedium?.copyWith(
-                                  color: colors.onSurface.withOpacity(0.7),
-                                ),
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () => _mostrarDialogo(roles: roles),
                               ),
-                              const SizedBox(height: 6),
-                              Wrap(
-                                spacing: 6,
-                                children: [
-                                  Chip(
-                                    label: Text(rol["permiso"]!),
-                                    backgroundColor: colors.onSurface
-                                        .withOpacity(0.15),
-                                    labelStyle: TextStyle(
-                                      color: colors.onSurface,
-                                    ),
-                                  ),
-                                ],
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _confirmarEliminar(roles),
                               ),
                             ],
                           ),
                         ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == "Editar") {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Editar rol: ${rol["nombre"]}"),
-                                ),
-                              );
-                            } else if (value == "Eliminar") {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Eliminar rol: ${rol["nombre"]}",
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: "Editar",
-                              child: Text("Editar"),
-                            ),
-                            const PopupMenuItem(
-                              value: "Eliminar",
-                              child: Text("Eliminar"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                      );
+                    },
+                  ),
+          ),
+          //  Controles de paginación
+          if (totalPages > 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: PaginacionControls(
+                currentPage: _currentPage,
+                totalPages: totalPages,
+                onPageChanged: (page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
                 },
               ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: colors.onSurface,
-        onPressed: () {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text("Agregar un nuevo rol")));
-        },
-        child: const Icon(Icons.add, color: Colors.white),
+            ),
+        ],
       ),
     );
   }
