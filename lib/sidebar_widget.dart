@@ -1,9 +1,36 @@
 import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/usuarios_screen.dart';
+import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/categorias_screen.dart';
+import 'data/repositories/auth_repository.dart';
+
 
 class SidebarWidget extends StatelessWidget {
   const SidebarWidget({super.key});
+
+  void _logout(BuildContext context) async {
+    if (context.mounted && Navigator.canPop(context)) {//Se cierra el sidebar junto a la session si no da error
+      Navigator.pop(context);
+    }
+
+    try{
+      final authRepository = AuthRepository();//Se crea una instancia del repositorio
+      await authRepository.logout();//Se llama a la funcion logout del repositorio
+
+      if (!context.mounted) return;//Verifica que el contexto siga siendo valido
+
+      context.router.replace(const LoginRoute());//Navega a la pantalla de login y reemplaza la pila de navegacion
+      
+    }catch(e){
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cerrar sesión: ${e.toString()}'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +123,10 @@ class SidebarWidget extends StatelessWidget {
           ListTile(leading: Icon(Icons.settings), title: Text("Configuracion")),
           ListTile(leading: Icon(Icons.help), title: Text("Soporte")),
           //Cerrar sesion
-          ListTile(leading: Icon(Icons.logout), title: Text("Cerrar Sesion")),
+          ListTile(leading: Icon(Icons.logout),title: Text("Cerrar Sesion",),
+            onTap: () => _logout(context), // CONECTADO A LA FUNCIÓN DE LOGOUT
+          ),
+          //ListTile(leading: Icon(Icons.logout), title: Text("Cerrar Sesion")),
         ],
       ),
     );
