@@ -1,13 +1,22 @@
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../services/auth_service.dart';
 
 class AuthRepository {
   final AuthService _authService = AuthService(); //Se realiza una inyeccion del servicio
 
+  static const String _authTokenKey = 'auth_token';
+
   Future<AuthResponse> login(String username, String password) async {
     try {
-      return await _authService.authenticate(username, password);
+      final authResponse = await _authService.authenticate(username, password);
+
+      // Guardar el token en SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_authTokenKey, authResponse.token);
+
+      return authResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
         final errorMessage =
@@ -30,6 +39,15 @@ class AuthRepository {
       throw Exception('Fallo en la conexion: ${e.message}');
     }catch (e) {
       throw Exception('Ocurrió un error inesperado durante el login.');
+    }
+  }
+
+  Future<void> logout() async {
+    try{
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_authTokenKey);
+    }catch(e){
+      throw Exception('Error al limpiar la session local.');
     }
   }
 }

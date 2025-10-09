@@ -127,6 +127,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
       },
       saveLabel: "Eliminar",
     );
+  
   }
 
   @override
@@ -146,7 +147,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         backgroundColor: colors.primaryContainer,
         title: Text(
           "Categorías",
-          style: fonts.titleMedium?.copyWith(color: colors.onPrimaryContainer),
+          style: fonts.titleLarge?.copyWith(color: colors.onPrimaryContainer, fontWeight: FontWeight.bold),
         ),
         iconTheme: IconThemeData(color: colors.onPrimaryContainer),
       ),

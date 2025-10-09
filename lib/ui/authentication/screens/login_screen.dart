@@ -13,14 +13,17 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final AuthRepository _authRepository =
+      AuthRepository(); //inicializamos el repositorio, la capa que vamos a usar
 
-  final AuthRepository _authRepository = AuthRepository(); //inicializamos el repositorio, la capa que vamos a usar
-
-  final TextEditingController _usernameController = TextEditingController(text: '',); //este controlador nos permite obtener el texto del campo de usuario
-  final TextEditingController _passwordController = TextEditingController(); //este controlador nos permite obtener el texto del campo de contraseña
+  final TextEditingController _usernameController = TextEditingController(
+    text: '',
+  ); //este controlador nos permite obtener el texto del campo de usuario
+  final TextEditingController _passwordController =
+      TextEditingController(); //este controlador nos permite obtener el texto del campo de contraseña
 
   bool _isLoading = false; //nuevo estado para controlar la animación del botón
-  
+
   @override
   void dispose() {
     _usernameController
@@ -31,15 +34,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
-    final username = _usernameController.text; //obtenemos el texto del campo de usuario
-    final password = _passwordController.text; //obtenemos el texto del campo de contraseña
+    final username =
+        _usernameController.text; //obtenemos el texto del campo de usuario
+    final password =
+        _passwordController.text; //obtenemos el texto del campo de contraseña
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Por favor ingrese usuario y contraseña',
-          ),
+          content: Text('Por favor ingrese usuario y contraseña'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -47,109 +50,171 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() {
-      _isLoading = true; //iniciamos el estado de carga y deshabilitamos el botón
+      _isLoading =
+          true; //iniciamos el estado de carga y deshabilitamos el botón
     });
 
-    try{
+    try {
       final authResponse = await _authRepository.login(username, password);
 
-      if (!mounted) return; //verificamos que el widget aún esté en el árbol de widgets
-
+      if (!mounted) {
+        return; //verificamos que el widget aún esté en el árbol de widgets
+      }
       //-----------Mensaje para cuando el login es correcto-----------
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!'),
-          backgroundColor: Colors.teal,
-          duration: const Duration(seconds: 3),
+          content: Text(
+            '✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!',
+          ),
+          backgroundColor: Theme.of(context)
+              .colorScheme
+              .primaryContainer, //utilizamos un color del tema para que combine con el diseño
+          duration: const Duration(seconds: 2),
         ),
       );
 
-      context.router.replacePath(HomePage.routeName); //navegamos a la pantalla de inicio y reemplazamos la pantalla de login
-      
-    }catch(e){
-      if (!mounted) return; //verificamos que el widget aún esté en el árbol de widgets
-
+      context.router.replacePath(
+        HomePage.routeName,
+      ); //navegamos a la pantalla de inicio y reemplazamos la pantalla de login
+    } catch (e) {
+      if (!mounted) {
+        return; //verificamos que el widget aún esté en el árbol de widgets
+      }
+      //-----------Mensaje para cuando el login falla-----------
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString().replaceFirst('Exception: ', '')}'),
-          backgroundColor: Colors.red,
+          content: Text(
+            'Error: ${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+          backgroundColor: Theme.of(context)
+              .colorScheme
+              .tertiary, //utilizamos un color del tema para que combine con el diseño,
           duration: const Duration(seconds: 3),
-        )
+        ),
       );
-    }finally{
-      if (mounted) { 
+    } finally {
+      if (mounted) {
         setState(() {
-          _isLoading = false; //finalizamos el estado de carga y habilitamos el botón
+          _isLoading =
+              false; //finalizamos el estado de carga y habilitamos el botón
         });
-      } 
+      }
     }
-    
   }
 
   @override
   Widget build(BuildContext context) {
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
-      backgroundColor: Colors.white, //color de fondo de la pantalla
-      body: SafeArea( //evita que el contenido se superponga con la barra de estado o la barra de navegación
-        child: Padding( 
-          padding: const EdgeInsets.symmetric(horizontal: 24),//padding horizontal de 24
-          child: Column( //columna para organizar los elementos verticalmente
-            mainAxisAlignment: MainAxisAlignment.center, //centrar los elementos verticalmente
-            crossAxisAlignment: CrossAxisAlignment.stretch, //estirar los elementos horizontalmente
+      backgroundColor: Colors.white,
+      // Usamos el resizeToAvoidBottomInset: true por defecto, pero con SingleChildScrollView es más robusto
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          // Permite que el contenido sea desplazable cuando el teclado está visible
+          padding: EdgeInsets.fromLTRB(
+            24,
+            50,
+            24,
+            24 + bottomInset,
+          ), // Añadimos padding inferior para evitar que el teclado cubra el contenido
+
+          child: Column(
+            // Columna para organizar los elementos verticalmente
+            crossAxisAlignment: CrossAxisAlignment
+                .stretch, // Estira los hijos para que ocupen todo el ancho disponible
             children: [
-              Image.asset( //Propiedad para cargar una imagen desde los assets
+              // ----------Logo de la farmacia---------
+              Image.asset(
                 'assets/images/farmacia joshua logo definitivo.png',
-                width: 250, //ancho de la imagen
-                height: 250, //alto de la imagen
-                fit: BoxFit.contain, //ajustar la imagen dentro del contenedor sin recortarla
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
               ),
-              const SizedBox(height: 40),//espacio entre la imagen y el campo de usuario
+              const SizedBox(height: 40),
 
               // ------Apartado de Usuario---------
               TextField(
-                controller: _usernameController, //asociamos el controlador al campo de usuario
-                decoration: InputDecoration( //decoracion del campo de usuario
-                  labelText: 'Nombre de usuario', //etiqueta del campo de usuario
-                  hintText: 'Ingrese su nombre de usuario', //texto de sugerencia dentro del campo de usuario
-                  prefixIcon: const Icon(Icons.person), //icono al inicio del campo de usuario
+                controller:
+                    _usernameController, //asociamos el controlador al campo de texto
+                style: textTheme.bodyMedium!.copyWith(
+                  color: colorScheme.onSurface, //color del texto según el tema
+                  fontSize: 16,
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Nombre de usuario',
+                  hintText: 'Ingrese su nombre de usuario',
+                  prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8), //redondeo de los bordes del campo de usuario
+                    borderRadius: BorderRadius.circular(8), //borde redondeado
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),//padding vertical dentro del campo de usuario
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: colorScheme
+                          .secondaryContainer, //color del borde según el tema
+                      width: 2, //grosor del borde
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 10,
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),//espacio entre el campo de usuario y el campo de contraseña
+              const SizedBox(height: 16),
 
               // ------Apartado de Contraseña---------
               TextField(
-                controller: _passwordController, //asociamos el controlador al campo de contraseña
-                obscureText: true, //oculta el texto ingresado en el campo de contraseña
+                controller: _passwordController,
+                obscureText: true,
+                style: textTheme.bodyMedium!.copyWith(
+                  color: colorScheme.onSurface, //color del texto según el tema
+                ),
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
                   hintText: 'Ingrese su contraseña',
-                  prefixIcon: const Icon(Icons.lock), //icono al inicio del campo de contraseña
+                  prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8), //redondeo de los bordes del campo de contraseña
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16), //padding vertical dentro del campo de contraseña
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: colorScheme
+                          .secondaryContainer, //color del borde según el tema
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 10,
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),//espacio entre el campo de contraseña y el botón login
+              const SizedBox(height: 24),
 
               // ------Boton de login---------
               ElevatedButton(
-                onPressed: _isLoading ? null :_login, //llama a la función _login cuando se presiona el botón
-                style: ElevatedButton.styleFrom( //estilo del botón
-                  backgroundColor: Colors.teal, //color de prueba del fondo del botón de
-                  foregroundColor: Colors.white, //color de prueba del texto del botón
-                  padding: const EdgeInsets.symmetric(vertical: 16), //padding vertical dentro del botón
-                  shape: RoundedRectangleBorder(//forma del botón
-                    borderRadius: BorderRadius.circular(8), //redondeo de los bordes del botón
+                onPressed: _isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme
+                      .secondaryContainer, //color del botón según el tema
+                  foregroundColor: colorScheme
+                      .onSecondaryContainer, //color del texto según el tema
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  elevation: 2,//sombra del botón
+                  elevation: 2,
                 ),
                 child: _isLoading
-                    // Mostrar CircularProgressIndicator mientras carga
                     ? const SizedBox(
                         width: 20,
                         height: 20,
@@ -158,19 +223,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           strokeWidth: 3,
                         ),
                       )
-                    : const Text( 
-                        'Ingresar', 
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    : Text(
+                        'Ingresar',
+                        style: textTheme.bodyLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSecondaryContainer,
+                        ),
                       ),
-               ), 
-               const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
 
-              // ------Link de olvido contraseña (de momento no estara funcional)---------
+              // ------Link de olvido contraseña---------
               TextButton(
                 onPressed: () {},
-                child: const Text(
+                child: Text(
                   '¿Olvidó su contraseña?',
-                  style: TextStyle(color: Colors.teal, fontSize: 14), //estilo del texto del link de prueba
+                  style: textTheme.bodySmall!.copyWith(
+                    color: colorScheme.secondaryContainer,
+                  ),
                 ),
               ),
             ],

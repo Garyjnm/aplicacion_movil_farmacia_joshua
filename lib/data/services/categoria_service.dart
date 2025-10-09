@@ -6,7 +6,7 @@ class CategoriaService {
   // Instancia de Dio para las solicitudes HTTP
   final Dio _dio = Dio();
   // URL base de la API
-  final String apiUrl = "http://10.0.2.2:50498/api/categoria";
+  final String apiUrl = "https://farmaciajoshua-f7bncqe5aaefdsfp.eastus2-01.azurewebsites.net/api/categoria";
 
   // Obtiene la lista de categorías, filtrando por estado (1=activo, 0=inactivo)
   Future<List<Categoria>> getCategorias({int estado = 1}) async {
