@@ -104,8 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtenemos la altura del teclado si está visible
+
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
@@ -140,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller:
                     _usernameController, //asociamos el controlador al campo de texto
-                style: TextStyle(
+                style: textTheme.bodyMedium!.copyWith(
                   color: colorScheme.onSurface, //color del texto según el tema
                   fontSize: 16,
                 ),
@@ -148,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Nombre de usuario',
                   hintText: 'Ingrese su nombre de usuario',
                   prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
-                  labelStyle: TextStyle(color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8), //borde redondeado
                   ),
@@ -172,15 +173,14 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                style: TextStyle(
+                style: textTheme.bodyMedium!.copyWith(
                   color: colorScheme.onSurface, //color del texto según el tema
-                  fontSize: 16,
                 ),
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
                   hintText: 'Ingrese su contraseña',
                   prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
-                  labelStyle: TextStyle(color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -225,8 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       )
                     : Text(
                         'Ingresar',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: textTheme.bodyLarge!.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSecondaryContainer,
                         ),
@@ -239,9 +238,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () {},
                 child: Text(
                   '¿Olvidó su contraseña?',
-                  style: TextStyle(
+                  style: textTheme.bodySmall!.copyWith(
                     color: colorScheme.secondaryContainer,
-                    fontSize: 14,
                   ),
                 ),
               ),
