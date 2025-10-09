@@ -1,3 +1,4 @@
+import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import '../../../data/models/roles.dart';
 import '../../../data/services/roles_services.dart';
@@ -6,15 +7,18 @@ import '../../core/widgets/custom_create_button.dart';
 import '../../core/widgets/custom_card.dart';
 import '../../core/widgets/custom_textfield.dart';
 import '../../core/widgets/custom_dialog.dart';
+import 'package:auto_route/auto_route.dart';
 
-class RolesScreens extends StatefulWidget {
-  const RolesScreens({Key? key}) : super(key: key);
+@RoutePage()
+class RolesScreen extends StatefulWidget {
+  static const String routeName = '/Roles';
+  const RolesScreen({Key? key}) : super(key: key);
 
   @override
-  State<RolesScreens> createState() => _RolesScreenState();
+  State<RolesScreen> createState() => _RolesScreenState();
 }
 
-class _RolesScreenState extends State<RolesScreens> {
+class _RolesScreenState extends State<RolesScreen> {
   final RolesServices _service = RolesServices();
 
   final TextEditingController _nombreController = TextEditingController();

@@ -43,6 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
 #----------------------------------
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,flutter
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,flutter
@@ -59,7 +60,6 @@ app.*.map.json
 .pub/
 build/
 coverage/
-lib/generated_plugin_registrant.dart
 # For library packages, don’t commit the pubspec.lock file.
 # Regenerating the pubspec.lock file lets you test your package against the latest compatible versions of its dependencies.
 # See https://dart.dev/guides/libraries/private-files#pubspeclock
@@ -133,5 +133,6 @@ lib/generated_plugin_registrant.dart
 **/GeneratedPluginRegistrant.*
 **/generated_plugin_registrant.*
 **/generated_plugins.cmake
+*.gr.dart
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,flutter

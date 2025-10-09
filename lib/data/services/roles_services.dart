@@ -6,7 +6,7 @@ class RolesServices {
   // Instancia de Dio para las solicitudes HTTP
   final Dio _dio = Dio();
   // URL base de la API
-  final String apiUrl = "http://192.168.1.221:5000/api/Rol";
+  final String apiUrl = 'http://10.0.2.2:50498/api/rol';
 
   // Obtiene la lista de roles, filtrando por estado (1=activo, 0=inactivo)
   Future<List<Roles>> getRol({int estado = 1}) async {

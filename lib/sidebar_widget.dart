@@ -1,5 +1,5 @@
+import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/roles_screen.dart';
 import 'package:flutter/material.dart';
-import 'ui/authentication/screens/roles_screens.dart'; // Asegúrate de importar tu pantalla de Roles
 
 class SidebarWidget extends StatelessWidget {
   const SidebarWidget({super.key});
@@ -31,34 +31,18 @@ class SidebarWidget extends StatelessWidget {
               ],
             ),
           ),
-          // Home
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text("Home"),
-            onTap: () {
-              Navigator.pop(context); // Cierra el drawer
-            },
-          ),
-          // Ventas
-          ListTile(
-            leading: Icon(Icons.receipt_long),
-            title: Text("Ventas"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          // Compras
-          ListTile(
-            leading: Icon(Icons.shopping_cart),
-            title: Text("Compras"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          // Inventario
+          //Elementos del sidebar
+          //Home
+          ListTile(leading: Icon(Icons.home), title: Text("Home")),
+          //Ventas
+          ListTile(leading: Icon(Icons.receipt_long), title: Text("Ventas")),
+          //Compras
+          ListTile(leading: Icon(Icons.shopping_cart), title: Text("Compras")),
+          //Inventario
           ExpansionTile(
             collapsedBackgroundColor: colors.primary,
-            iconColor: colors.onPrimary,
+            iconColor: colors
+                .onPrimary, //Color del icono de la derecha cuando esta expandido
             leading: Icon(Icons.inventory),
             title: Text("Inventario"),
             childrenPadding: const EdgeInsets.only(left: 10),
@@ -73,9 +57,6 @@ class SidebarWidget extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.category),
                 title: Text("Categorias"),
-                onTap: () {
-                  Navigator.pop(context);
-                },
               ),
               ListTile(
                 leading: Icon(Icons.local_shipping),
@@ -92,53 +73,21 @@ class SidebarWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const RolesScreens(),
+                      builder: (context) => const RolesScreen(),
                     ),
                   );
                 },
               ),
             ],
           ),
-          // Clientes
-          ListTile(
-            leading: Icon(Icons.list),
-            title: Text("Clientes"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          // Usuarios
-          ListTile(
-            leading: Icon(Icons.people),
-            title: Text("Usuarios"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          // Configuración
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text("Configuracion"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          // Soporte
-          ListTile(
-            leading: Icon(Icons.help),
-            title: Text("Soporte"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          // Cerrar sesión
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text("Cerrar Sesion"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+          //Clientes
+          ListTile(leading: Icon(Icons.list), title: Text("Clientes")),
+          ListTile(leading: Icon(Icons.people), title: Text("Usuarios")),
+          //Configuracion
+          ListTile(leading: Icon(Icons.settings), title: Text("Configuracion")),
+          ListTile(leading: Icon(Icons.help), title: Text("Soporte")),
+          //Cerrar sesion
+          ListTile(leading: Icon(Icons.logout), title: Text("Cerrar Sesion")),
         ],
       ),
     );
