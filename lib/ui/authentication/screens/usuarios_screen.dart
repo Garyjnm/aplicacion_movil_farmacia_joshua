@@ -178,7 +178,7 @@ final UsuarioService _service = UsuarioService();
         backgroundColor: colors.primaryContainer, // Fondo del AppBar
         title: Text(
           "Usuarios", // Título de la pantalla
-          style: fonts.titleMedium?.copyWith(color: colors.onPrimaryContainer), // Estilo del texto
+          style: fonts.titleLarge?.copyWith(color: colors.onPrimaryContainer, fontWeight: FontWeight.bold), // Estilo del texto
         ),
         iconTheme: IconThemeData(color: colors.onPrimaryContainer), // Color de íconos
       ),
