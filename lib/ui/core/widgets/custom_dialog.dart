@@ -14,7 +14,7 @@ Future<void> showCustomDialog({
 
   final List<Widget> dialogActions = [];
 
-  // 🔹 Botón Cancelar (idéntico al de Guardar, pero con colores secundarios)
+  // Botón Cancelar (idéntico al de Guardar, pero con colores secundarios)
   if (includeCancel) {
     dialogActions.add(
       ElevatedButton(
