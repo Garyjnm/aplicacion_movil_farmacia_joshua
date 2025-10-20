@@ -14,4 +14,44 @@ class VentaService {
     final response = await _dio.get('/venta/$id');
     return Venta.fromJson(response.data);
   }
+
+  Future<Venta> createVenta(Venta venta) async {
+    final response = await _dio.post('/venta', data: {
+      'idCliente': venta.idCliente,
+      'idUsuario': venta.idUsuario,
+      'fechaVenta': venta.fechaVenta.toIso8601String(),
+      'total': venta.total,
+      'ventaDetalle': venta.ventaDetalle
+          .map((d) => {
+                'idProducto': d.idProducto,
+                'cantidad': d.cantidad,
+                'precioUnitario': d.precioUnitario,
+                'subtotal': d.subtotal,
+              })
+          .toList(),
+    });
+    return Venta.fromJson(response.data);
+  }
+
+  Future<Venta> updateVenta(Venta venta) async {
+    final response = await _dio.put('/venta/${venta.idVenta}', data: {
+      'idCliente': venta.idCliente,
+      'idUsuario': venta.idUsuario,
+      'fechaVenta': venta.fechaVenta.toIso8601String(),
+      'total': venta.total,
+      'ventaDetalle': venta.ventaDetalle
+          .map((d) => {
+                'idProducto': d.idProducto,
+                'cantidad': d.cantidad,
+                'precioUnitario': d.precioUnitario,
+                'subtotal': d.subtotal,
+              })
+          .toList(),
+    });
+    return Venta.fromJson(response.data);
+  }
+
+  Future<void> deleteVenta(int idVenta) async {
+    await _dio.delete('/venta/$idVenta');
+  }
 }

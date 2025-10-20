@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/services/venta_service.dart';
 import '../../../data/models/venta.dart';
+import '../../core/widgets/custom_card.dart';
 
 class DetalleVentaScreen extends StatefulWidget {
   final int idVenta;
@@ -22,8 +23,14 @@ class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final fonts = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Detalle de Venta")),
+      appBar: AppBar(
+        title: const Text("Detalle de Venta"),
+        backgroundColor: colors.primaryContainer,
+      ),
       body: FutureBuilder<Venta>(
         future: _venta,
         builder: (context, snapshot) {
@@ -40,29 +47,56 @@ class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Venta #${venta.idVenta}",
-                    style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 8),
-                Text("Cliente: ${venta.idCliente}"),
-                Text("Usuario: ${venta.idUsuario}"),
                 Text(
-                    "Fecha: ${venta.fechaVenta.day}/${venta.fechaVenta.month}/${venta.fechaVenta.year}"),
-                Text("Total: \$${venta.total.toStringAsFixed(2)}"),
+                  "Venta #${venta.idVenta}",
+                  style: fonts.headlineMedium?.copyWith(
+                    color: colors.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text("Cliente: ${venta.idCliente}",
+                    style: TextStyle(color: colors.onPrimaryContainer)),
+                Text("Usuario: ${venta.idUsuario}",
+                    style: TextStyle(color: colors.onPrimaryContainer)),
+                Text(
+                    "Fecha: ${venta.fechaVenta.day}/${venta.fechaVenta.month}/${venta.fechaVenta.year}",
+                    style: TextStyle(color: colors.onPrimaryContainer)),
+                Text("Total: \$${venta.total.toStringAsFixed(2)}",
+                    style: TextStyle(
+                        color: colors.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
                 const SizedBox(height: 16),
                 Text("Detalle de Productos:",
-                    style: Theme.of(context).textTheme.titleMedium),
+                    style: fonts.titleMedium?.copyWith(
+                        color: colors.onPrimaryContainer,
+                        fontWeight: FontWeight.bold)),
                 const Divider(),
                 Expanded(
                   child: ListView.builder(
                     itemCount: venta.ventaDetalle.length,
                     itemBuilder: (context, index) {
                       final detalle = venta.ventaDetalle[index];
-                      return ListTile(
-                        title: Text("Producto #${detalle.idProducto}"),
-                        subtitle:
-                            Text("Cantidad: ${detalle.cantidad} - Precio: \$${detalle.precioUnitario.toStringAsFixed(2)}"),
-                        trailing: Text(
-                            "Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}"),
+                      return CustomCard(
+                        child: ListTile(
+                          title: Text(
+                            "Producto #${detalle.idProducto}",
+                            style:
+                                TextStyle(color: colors.onPrimaryContainer),
+                          ),
+                          subtitle: Text(
+                            "Cantidad: ${detalle.cantidad} - Precio: \$${detalle.precioUnitario.toStringAsFixed(2)}",
+                            style:
+                                TextStyle(color: colors.onPrimaryContainer),
+                          ),
+                          trailing: Text(
+                            "Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}",
+                            style: TextStyle(
+                                color: colors.secondary,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       );
                     },
                   ),

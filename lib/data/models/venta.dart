@@ -2,10 +2,10 @@ import 'detalle_venta.dart';
 
 class Venta {
   final int idVenta;
-  final int idCliente;
+  int idCliente;
   final int idUsuario;
   final DateTime fechaVenta;
-  final double total;
+  double total;
   final List<DetalleVenta> ventaDetalle;
 
   Venta({

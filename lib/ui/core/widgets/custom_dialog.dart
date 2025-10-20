@@ -32,7 +32,7 @@ Future<void> showCustomDialog({
     );
   }
 
-  // 🔹 Botón Guardar (acción principal)
+  //  Botón Guardar (acción principal)
   dialogActions.add(
     ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -51,7 +51,7 @@ Future<void> showCustomDialog({
     ),
   );
 
-  // 🔹 Mostrar el diálogo
+  // Mostrar el diálogo
   return showDialog(
     context: context,
     builder: (context) => AlertDialog(
