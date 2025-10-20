@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import '../models/venta.dart';
 
 class VentaService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'https://localhost:50498/api/'));
+  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:50498/api'));
 
   Future<List<Venta>> fetchVentas() async {
     final response = await _dio.get('/venta');

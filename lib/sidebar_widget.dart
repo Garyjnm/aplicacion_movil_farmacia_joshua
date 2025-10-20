@@ -3,6 +3,7 @@ import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/categorias_screen.dart';
+import 'ui/authentication/screens/ventas_screen.dart';
 import 'data/repositories/auth_repository.dart';
 
 
@@ -64,7 +65,19 @@ class SidebarWidget extends StatelessWidget {
           //Home
           ListTile(leading: Icon(Icons.home), title: Text("Home")),
           //Ventas
-          ListTile(leading: Icon(Icons.receipt_long), title: Text("Ventas")),
+          ListTile(
+            leading: Icon(Icons.receipt_long),
+            title: Text("Ventas"),
+            onTap: () {
+              Navigator.pop(context); // Cierra el drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VentasScreen(),
+                ),
+              );
+            },
+          ),
           //Compras
           ListTile(leading: Icon(Icons.shopping_cart), title: Text("Compras")),
           //Inventario
@@ -105,6 +118,7 @@ class SidebarWidget extends StatelessWidget {
           ),
           //Clientes
           ListTile(leading: Icon(Icons.list), title: Text("Clientes")),
+          //Usuarios
           ListTile(
            leading: const Icon(Icons.people),
             title: const Text("Usuarios"),
