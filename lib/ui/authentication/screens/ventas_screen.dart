@@ -7,7 +7,7 @@ import '../../core/widgets/custom_card.dart';
 import '../../core/widgets/custom_create_button.dart';
 import '../../core/widgets/custom_dialog.dart';
 import '../../core/widgets/custom_textfield.dart';
-import '../../core/widgets/paginacion_controls.dart'; // 👈 Importamos tu widget de paginación
+import '../../core/widgets/paginacion_controls.dart'; 
 
 class VentasScreen extends StatefulWidget {
   const VentasScreen({Key? key}) : super(key: key);
@@ -22,7 +22,7 @@ class _VentasScreenState extends State<VentasScreen> {
 
   // Paginación
   int currentPage = 1;
-  final int itemsPerPage = 5; // 👈 Número de ventas por página
+  final int itemsPerPage = 5; // Número de ventas por página
 
   // Controladores
   final clienteController = TextEditingController();
@@ -48,80 +48,98 @@ class _VentasScreenState extends State<VentasScreen> {
 
   // Crear venta
   void _crearVenta() {
-    clienteController.clear();
-    usuarioController.clear();
-    fechaController.text = DateTime.now().toString();
-    productoController.clear();
-    cantidadController.clear();
-    precioController.clear();
-    totalController.clear();
+  clienteController.clear();
+  usuarioController.clear();
+  fechaController.text = DateTime.now().toString();
+  productoController.clear();
+  cantidadController.clear();
+  precioController.clear();
+  totalController.clear();
 
-    showCustomDialog(
-      context: context,
-      title: "Nueva Venta",
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CustomTextField(controller: clienteController, label: "ID Cliente"),
-            const SizedBox(height: 10),
-            CustomTextField(controller: usuarioController, label: "ID Usuario"),
-            const SizedBox(height: 10),
-            CustomTextField(controller: fechaController, label: "Fecha Venta"),
-            const SizedBox(height: 10),
-            CustomTextField(controller: productoController, label: "ID Producto"),
-            const SizedBox(height: 10),
-            CustomTextField(controller: cantidadController, label: "Cantidad"),
-            const SizedBox(height: 10),
-            CustomTextField(controller: precioController, label: "Precio Unitario"),
-            const SizedBox(height: 10),
-            CustomTextField(controller: totalController, label: "Total"),
-          ],
-        ),
+  showCustomDialog(
+    context: context,
+    title: "Nueva Venta",
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(controller: clienteController, label: "ID Cliente"),
+          const SizedBox(height: 10),
+          CustomTextField(controller: usuarioController, label: "ID Usuario"),
+          const SizedBox(height: 10),
+          CustomTextField(controller: fechaController, label: "Fecha Venta"),
+          const SizedBox(height: 10),
+          CustomTextField(controller: productoController, label: "ID Producto"),
+          const SizedBox(height: 10),
+          CustomTextField(controller: cantidadController, label: "Cantidad"),
+          const SizedBox(height: 10),
+          CustomTextField(controller: precioController, label: "Precio Unitario"),
+          const SizedBox(height: 10),
+          CustomTextField(controller: totalController, label: "Total"),
+        ],
       ),
-      onSave: () async {
-        if (clienteController.text.isEmpty ||
-            usuarioController.text.isEmpty ||
-            productoController.text.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Por favor completa todos los campos.")),
-          );
-          return;
+    ),
+    onSave: () async {
+      if (clienteController.text.isEmpty ||
+          usuarioController.text.isEmpty ||
+          productoController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Por favor completa todos los campos.")),
+        );
+        return;
+      }
+
+      final detalle = DetalleVenta(
+        idDetalleVenta: 0,
+        idVenta: 0,
+        idProducto: int.tryParse(productoController.text) ?? 0,
+        cantidad: int.tryParse(cantidadController.text) ?? 0,
+        precioUnitario: double.tryParse(precioController.text) ?? 0,
+        subtotal: (int.tryParse(cantidadController.text) ?? 0) *
+            (double.tryParse(precioController.text) ?? 0),
+      );
+
+      final venta = Venta(
+        idVenta: 0,
+        idCliente: int.tryParse(clienteController.text) ?? 0,
+        idUsuario: int.tryParse(usuarioController.text) ?? 0,
+        fechaVenta: DateTime.now(),
+        total: double.tryParse(totalController.text) ?? 0.0,
+        ventaDetalle: [detalle],
+      );
+
+      try {
+        // Creamos la venta y esperamos la confirmación del backend
+        await service.createVenta(venta);
+
+        // Volvemos a cargar ventas y nos aseguramos que devuelve una lista
+        final nuevasVentas = await service.fetchVentas();
+
+        if (nuevasVentas is List<Venta>) {
+          setState(() {
+            _ventas = Future.value(nuevasVentas);
+          });
+          if (context.mounted) {
+            Navigator.of(context).pop(); // cerrar diálogo
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Venta creada correctamente.")),
+            );
+          }
+        // ignore: dead_code
+        } else {
+          throw Exception("El servidor no devolvió una lista válida.");
         }
-
-        final detalle = DetalleVenta(
-          idDetalleVenta: 0,
-          idVenta: 0,
-          idProducto: int.tryParse(productoController.text) ?? 0,
-          cantidad: int.tryParse(cantidadController.text) ?? 0,
-          precioUnitario: double.tryParse(precioController.text) ?? 0,
-          subtotal: (int.tryParse(cantidadController.text) ?? 0) *
-              (double.tryParse(precioController.text) ?? 0),
-        );
-
-        final venta = Venta(
-          idVenta: 0,
-          idCliente: int.tryParse(clienteController.text) ?? 0,
-          idUsuario: int.tryParse(usuarioController.text) ?? 0,
-          fechaVenta: DateTime.now(),
-          total: double.tryParse(totalController.text) ?? 0.0,
-          ventaDetalle: [detalle],
-        );
-
-        try {
-          await service.createVenta(venta);
-          _refreshVentas();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Venta creada correctamente.")),
-          );
-        } catch (e) {
+      } catch (e) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error al crear venta: $e")),
           );
         }
-      },
-    );
-  }
+      }
+    },
+  );
+}
+
 
   // Editar venta
   void _editarVenta(Venta venta) {
@@ -286,7 +304,7 @@ class _VentasScreenState extends State<VentasScreen> {
             );
           }
 
-          // --- Paginación local ---
+          //Paginación local
           final totalPages =
               (ventas.length / itemsPerPage).ceil().clamp(1, double.infinity).toInt();
           final startIndex = (currentPage - 1) * itemsPerPage;
@@ -342,7 +360,7 @@ class _VentasScreenState extends State<VentasScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              // --- Widget de paginación ---
+              // Widget de paginación
               PaginacionControls(
                 currentPage: currentPage,
                 totalPages: totalPages,
