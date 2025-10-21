@@ -7,6 +7,7 @@ import '../../core/widgets/custom_card.dart';
 import '../../core/widgets/custom_create_button.dart';
 import '../../core/widgets/custom_dialog.dart';
 import '../../core/widgets/custom_textfield.dart';
+import '../../core/widgets/paginacion_controls.dart'; // 👈 Importamos tu widget de paginación
 
 class VentasScreen extends StatefulWidget {
   const VentasScreen({Key? key}) : super(key: key);
@@ -18,6 +19,10 @@ class VentasScreen extends StatefulWidget {
 class _VentasScreenState extends State<VentasScreen> {
   final VentaService service = VentaService();
   late Future<List<Venta>> _ventas;
+
+  // Paginación
+  int currentPage = 1;
+  final int itemsPerPage = 5; // 👈 Número de ventas por página
 
   // Controladores
   final clienteController = TextEditingController();
@@ -37,6 +42,7 @@ class _VentasScreenState extends State<VentasScreen> {
   void _refreshVentas() {
     setState(() {
       _ventas = service.fetchVentas();
+      currentPage = 1; // Reiniciamos a la primera página
     });
   }
 
@@ -53,7 +59,6 @@ class _VentasScreenState extends State<VentasScreen> {
     showCustomDialog(
       context: context,
       title: "Nueva Venta",
-
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -199,19 +204,27 @@ class _VentasScreenState extends State<VentasScreen> {
 
   // Eliminar venta
   void _eliminarVenta(int id) async {
+    final colors = Theme.of(context).colorScheme;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Eliminar venta"),
-        content: const Text("¿Deseas eliminar esta venta permanentemente?"),
+        backgroundColor: colors.surface,
+        title: Text("Eliminar venta", style: TextStyle(color: colors.onSurface)),
+        content: Text(
+          "¿Deseas eliminar esta venta permanentemente?",
+          style: TextStyle(color: colors.onSurface),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancelar"),
+            child: Text("Cancelar", style: TextStyle(color: colors.secondary)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
+            ),
             child: const Text("Eliminar"),
           ),
         ],
@@ -230,14 +243,20 @@ class _VentasScreenState extends State<VentasScreen> {
   //  UI
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        title: const Text("Ventas", style: TextStyle(color: Colors.white)),
+        backgroundColor: colors.primaryContainer,
+        title: Text(
+          "Ventas",
+          style: textTheme.titleLarge?.copyWith(color: colors.onPrimaryContainer),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: Icon(Icons.refresh, color: colors.onPrimaryContainer),
             onPressed: _refreshVentas,
           )
         ],
@@ -253,50 +272,86 @@ class _VentasScreenState extends State<VentasScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text('Error: ${snapshot.error}',
+                  style: TextStyle(color: colors.onSurface)),
+            );
           }
 
           final ventas = snapshot.data ?? [];
           if (ventas.isEmpty) {
-            return const Center(child: Text('No hay ventas registradas.'));
+            return Center(
+              child: Text('No hay ventas registradas.',
+                  style: TextStyle(color: colors.onSurface)),
+            );
           }
 
-          return ListView.builder(
-            itemCount: ventas.length,
-            itemBuilder: (context, index) {
-              final venta = ventas[index];
-              return CustomCard(
-                child: ListTile(
-                  leading: const Icon(Icons.receipt_long, color: Colors.teal),
-                  title: Text("Venta #${venta.idVenta}"),
-                  subtitle: Text(
-                    "Cliente: ${venta.idCliente} | Usuario: ${venta.idUsuario}\nTotal: \$${venta.total.toStringAsFixed(2)}",
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _editarVenta(venta),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _eliminarVenta(venta.idVenta),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            DetalleVentaScreen(idVenta: venta.idVenta),
+          // --- Paginación local ---
+          final totalPages =
+              (ventas.length / itemsPerPage).ceil().clamp(1, double.infinity).toInt();
+          final startIndex = (currentPage - 1) * itemsPerPage;
+          final endIndex = (startIndex + itemsPerPage).clamp(0, ventas.length);
+          final ventasPagina = ventas.sublist(startIndex, endIndex);
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: ventasPagina.length,
+                  itemBuilder: (context, index) {
+                    final venta = ventasPagina[index];
+                    return CustomCard(
+                      child: ListTile(
+                        leading: Icon(Icons.receipt_long,
+                            color: colors.onPrimaryContainer),
+                        title: Text(
+                          "Venta #${venta.idVenta}",
+                          style: textTheme.titleMedium
+                              ?.copyWith(color: colors.onPrimaryContainer),
+                        ),
+                        subtitle: Text(
+                          "Cliente: ${venta.idCliente} | Usuario: ${venta.idUsuario}\nTotal: \$${venta.total.toStringAsFixed(2)}",
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: colors.onPrimaryContainer),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: colors.secondary),
+                              onPressed: () => _editarVenta(venta),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: colors.error),
+                              onPressed: () => _eliminarVenta(venta.idVenta),
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  DetalleVentaScreen(idVenta: venta.idVenta),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
                 ),
-              );
-            },
+              ),
+              const SizedBox(height: 8),
+              // --- Widget de paginación ---
+              PaginacionControls(
+                currentPage: currentPage,
+                totalPages: totalPages,
+                onPageChanged: (page) {
+                  setState(() => currentPage = page);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
           );
         },
       ),
