@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import '';
 import '../../../data/services/venta_service.dart';
 import '../../../data/models/venta.dart';
 import '../../../data/models/detalle_venta.dart';
-import 'detalle_venta_screen.dart';
 import '../../core/widgets/custom_card.dart';
 import '../../core/widgets/custom_create_button.dart';
 import '../../core/widgets/custom_dialog.dart';
 import '../../core/widgets/custom_textfield.dart';
-import '../../core/widgets/paginacion_controls.dart'; 
+import '../../core/widgets/paginacion_controls.dart';
+import 'detalle_venta_screen.dart';
 
 class VentasScreen extends StatefulWidget {
   const VentasScreen({Key? key}) : super(key: key);
@@ -17,12 +18,9 @@ class VentasScreen extends StatefulWidget {
 }
 
 class _VentasScreenState extends State<VentasScreen> {
-  final VentaService service = VentaService();
-  late Future<List<Venta>> _ventas;
-
-  // Paginación
-  int currentPage = 1;
-  final int itemsPerPage = 5; // Número de ventas por página
+  final VentaService _service = VentaService();
+  List<Venta> _allVentas = [];
+  late Future<void> _loadFuture;
 
   // Controladores
   final clienteController = TextEditingController();
@@ -33,136 +31,61 @@ class _VentasScreenState extends State<VentasScreen> {
   final precioController = TextEditingController();
   final totalController = TextEditingController();
 
+  // Paginación
+  int currentPage = 1;
+  final int itemsPerPage = 5;
+
   @override
   void initState() {
     super.initState();
-    _ventas = service.fetchVentas();
+    _loadFuture = _loadVentas();
   }
 
-  void _refreshVentas() {
+  Future<void> _loadVentas() async {
+    final data = await _service.fetchVentas();
     setState(() {
-      _ventas = service.fetchVentas();
-      currentPage = 1; // Reiniciamos a la primera página
+      _allVentas = data;
     });
   }
 
-  // Crear venta
-  void _crearVenta() {
-  clienteController.clear();
-  usuarioController.clear();
-  fechaController.text = DateTime.now().toString();
-  productoController.clear();
-  cantidadController.clear();
-  precioController.clear();
-  totalController.clear();
+  void _refresh() async {
+    await _loadVentas();
+  }
 
-  showCustomDialog(
-    context: context,
-    title: "Nueva Venta",
-    content: SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomTextField(controller: clienteController, label: "ID Cliente"),
-          const SizedBox(height: 10),
-          CustomTextField(controller: usuarioController, label: "ID Usuario"),
-          const SizedBox(height: 10),
-          CustomTextField(controller: fechaController, label: "Fecha Venta"),
-          const SizedBox(height: 10),
-          CustomTextField(controller: productoController, label: "ID Producto"),
-          const SizedBox(height: 10),
-          CustomTextField(controller: cantidadController, label: "Cantidad"),
-          const SizedBox(height: 10),
-          CustomTextField(controller: precioController, label: "Precio Unitario"),
-          const SizedBox(height: 10),
-          CustomTextField(controller: totalController, label: "Total"),
-        ],
-      ),
-    ),
-    onSave: () async {
-      if (clienteController.text.isEmpty ||
-          usuarioController.text.isEmpty ||
-          productoController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Por favor completa todos los campos.")),
-        );
-        return;
+  /// ✅ Mostrar diálogo de crear o editar
+  void _mostrarDialogo({Venta? venta}) {
+    final bool isEdit = venta != null;
+
+    if (isEdit) {
+      clienteController.text = venta!.idCliente.toString();
+      usuarioController.text = venta.idUsuario.toString();
+      fechaController.text = venta.fechaVenta.toIso8601String();
+
+      if (venta.ventaDetalle.isNotEmpty) {
+        productoController.text = venta.ventaDetalle[0].idProducto.toString();
+        cantidadController.text = venta.ventaDetalle[0].cantidad.toString();
+        precioController.text =
+            venta.ventaDetalle[0].precioUnitario.toStringAsFixed(2);
+      } else {
+        productoController.clear();
+        cantidadController.clear();
+        precioController.clear();
       }
 
-      final detalle = DetalleVenta(
-        idDetalleVenta: 0,
-        idVenta: 0,
-        idProducto: int.tryParse(productoController.text) ?? 0,
-        cantidad: int.tryParse(cantidadController.text) ?? 0,
-        precioUnitario: double.tryParse(precioController.text) ?? 0,
-        subtotal: (int.tryParse(cantidadController.text) ?? 0) *
-            (double.tryParse(precioController.text) ?? 0),
-      );
-
-      final venta = Venta(
-        idVenta: 0,
-        idCliente: int.tryParse(clienteController.text) ?? 0,
-        idUsuario: int.tryParse(usuarioController.text) ?? 0,
-        fechaVenta: DateTime.now(),
-        total: double.tryParse(totalController.text) ?? 0.0,
-        ventaDetalle: [detalle],
-      );
-
-      try {
-        // Creamos la venta y esperamos la confirmación del backend
-        await service.createVenta(venta);
-
-        // Volvemos a cargar ventas y nos aseguramos que devuelve una lista
-        final nuevasVentas = await service.fetchVentas();
-
-        if (nuevasVentas is List<Venta>) {
-          setState(() {
-            _ventas = Future.value(nuevasVentas);
-          });
-          if (context.mounted) {
-            Navigator.of(context).pop(); // cerrar diálogo
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Venta creada correctamente.")),
-            );
-          }
-        // ignore: dead_code
-        } else {
-          throw Exception("El servidor no devolvió una lista válida.");
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error al crear venta: $e")),
-          );
-        }
-      }
-    },
-  );
-}
-
-
-  // Editar venta
-  void _editarVenta(Venta venta) {
-    clienteController.text = venta.idCliente.toString();
-    usuarioController.text = venta.idUsuario.toString();
-    fechaController.text = venta.fechaVenta.toString();
-
-    if (venta.ventaDetalle.isNotEmpty) {
-      productoController.text = venta.ventaDetalle[0].idProducto.toString();
-      cantidadController.text = venta.ventaDetalle[0].cantidad.toString();
-      precioController.text =
-          venta.ventaDetalle[0].precioUnitario.toStringAsFixed(2);
+      totalController.text = venta.total.toStringAsFixed(2);
     } else {
+      clienteController.clear();
+      usuarioController.clear();
+      fechaController.text = DateTime.now().toIso8601String();
       productoController.clear();
       cantidadController.clear();
       precioController.clear();
+      totalController.clear();
     }
-
-    totalController.text = venta.total.toStringAsFixed(2);
 
     showCustomDialog(
       context: context,
-      title: "Editar Venta #${venta.idVenta}",
+      title: isEdit ? "Editar Venta #${venta!.idVenta}" : "Nueva Venta",
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -184,85 +107,80 @@ class _VentasScreenState extends State<VentasScreen> {
         ),
       ),
       onSave: () async {
-        final detalleActualizado = DetalleVenta(
-          idDetalleVenta: venta.ventaDetalle.isNotEmpty
-              ? venta.ventaDetalle[0].idDetalleVenta
-              : 0,
-          idVenta: venta.idVenta,
-          idProducto: int.tryParse(productoController.text) ?? 0,
-          cantidad: int.tryParse(cantidadController.text) ?? 0,
-          precioUnitario: double.tryParse(precioController.text) ?? 0,
-          subtotal: (int.tryParse(cantidadController.text) ?? 0) *
-              (double.tryParse(precioController.text) ?? 0),
-        );
-
-        final ventaEditada = Venta(
-          idVenta: venta.idVenta,
-          idCliente: int.tryParse(clienteController.text) ?? venta.idCliente,
-          idUsuario: int.tryParse(usuarioController.text) ?? venta.idUsuario,
-          fechaVenta: DateTime.tryParse(fechaController.text) ?? venta.fechaVenta,
-          total: double.tryParse(totalController.text) ?? venta.total,
-          ventaDetalle: [detalleActualizado],
-        );
-
         try {
-          await service.updateVenta(ventaEditada);
-          _refreshVentas();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Venta actualizada correctamente.")),
+          final detalle = DetalleVenta(
+            idDetalleVenta: isEdit && venta!.ventaDetalle.isNotEmpty
+                ? venta.ventaDetalle[0].idDetalleVenta
+                : 0,
+            idVenta: isEdit ? venta!.idVenta : 0,
+            idProducto: int.tryParse(productoController.text) ?? 0,
+            cantidad: int.tryParse(cantidadController.text) ?? 0,
+            precioUnitario: double.tryParse(precioController.text) ?? 0,
+            subtotal: (int.tryParse(cantidadController.text) ?? 0) *
+                (double.tryParse(precioController.text) ?? 0),
           );
+
+          final ventaNueva = Venta(
+            idVenta: isEdit ? venta!.idVenta : 0,
+            idCliente: int.tryParse(clienteController.text) ?? 0,
+            idUsuario: int.tryParse(usuarioController.text) ?? 0,
+            fechaVenta: DateTime.tryParse(fechaController.text) ?? DateTime.now(),
+            total: double.tryParse(totalController.text) ?? 0.0,
+            ventaDetalle: [detalle],
+          );
+
+          if (isEdit) {
+            await _service.updateVenta(ventaNueva);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Venta actualizada correctamente.")),
+            );
+          } else {
+            await _service.createVenta(ventaNueva);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Venta creada correctamente.")),
+            );
+          }
+
+          _refresh();
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error al actualizar: $e")),
+            SnackBar(content: Text("Error: $e")),
           );
         }
       },
     );
   }
 
-  // Eliminar venta
-  void _eliminarVenta(int id) async {
+  void _eliminarVenta(Venta venta) async {
     final colors = Theme.of(context).colorScheme;
-    final confirm = await showDialog<bool>(
+    showCustomDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: colors.surface,
-        title: Text("Eliminar venta", style: TextStyle(color: colors.onSurface)),
-        content: Text(
-          "¿Deseas eliminar esta venta permanentemente?",
-          style: TextStyle(color: colors.onSurface),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text("Cancelar", style: TextStyle(color: colors.secondary)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.error,
-              foregroundColor: colors.onError,
-            ),
-            child: const Text("Eliminar"),
-          ),
-        ],
+      title: "Eliminar Venta",
+      content: Text(
+        "¿Seguro que deseas eliminar la venta #${venta.idVenta}?",
+        style: TextStyle(color: colors.onSurface),
       ),
+      onSave: () async {
+        await _service.deleteVenta(venta.idVenta);
+        _refresh();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Venta eliminada correctamente.")),
+        );
+      },
+      saveLabel: "Eliminar",
     );
-
-    if (confirm == true) {
-      await service.deleteVenta(id);
-      _refreshVentas();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Venta eliminada correctamente.")),
-      );
-    }
   }
 
-  //  UI
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final fonts = Theme.of(context).textTheme;
+
+    final totalPages =
+        (_allVentas.length / itemsPerPage).ceil().clamp(1, double.infinity).toInt();
+    final startIndex = (currentPage - 1) * itemsPerPage;
+    final endIndex = (startIndex + itemsPerPage).clamp(0, _allVentas.length);
+    final ventasPagina = _allVentas.sublist(startIndex, endIndex);
 
     return Scaffold(
       backgroundColor: colors.surface,
@@ -270,105 +188,95 @@ class _VentasScreenState extends State<VentasScreen> {
         backgroundColor: colors.primaryContainer,
         title: Text(
           "Ventas",
-          style: textTheme.titleLarge?.copyWith(color: colors.onPrimaryContainer),
+          style: fonts.titleLarge?.copyWith(color: colors.onPrimaryContainer),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: colors.onPrimaryContainer),
-            onPressed: _refreshVentas,
-          )
-        ],
+        iconTheme: IconThemeData(color: colors.onPrimaryContainer),
       ),
-      floatingActionButton: CustomCreateButton(
-        label: "Nueva Venta",
-        onPressed: _crearVenta,
-      ),
-      body: FutureBuilder<List<Venta>>(
-        future: _ventas,
+      body: FutureBuilder(
+        future: _loadFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              _allVentas.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}',
-                  style: TextStyle(color: colors.onSurface)),
-            );
-          }
-
-          final ventas = snapshot.data ?? [];
-          if (ventas.isEmpty) {
-            return Center(
-              child: Text('No hay ventas registradas.',
-                  style: TextStyle(color: colors.onSurface)),
-            );
-          }
-
-          //Paginación local
-          final totalPages =
-              (ventas.length / itemsPerPage).ceil().clamp(1, double.infinity).toInt();
-          final startIndex = (currentPage - 1) * itemsPerPage;
-          final endIndex = (startIndex + itemsPerPage).clamp(0, ventas.length);
-          final ventasPagina = ventas.sublist(startIndex, endIndex);
 
           return Column(
             children: [
+              // ✅ Botón “Nueva Venta” arriba del listado
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CustomCreateButton(
+                  label: "Nueva Venta",
+                  onPressed: () => _mostrarDialogo(),
+                ),
+              ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: ventasPagina.length,
-                  itemBuilder: (context, index) {
-                    final venta = ventasPagina[index];
-                    return CustomCard(
-                      child: ListTile(
-                        leading: Icon(Icons.receipt_long,
-                            color: colors.onPrimaryContainer),
-                        title: Text(
-                          "Venta #${venta.idVenta}",
-                          style: textTheme.titleMedium
-                              ?.copyWith(color: colors.onPrimaryContainer),
+                child: ventasPagina.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No hay ventas registradas.",
+                          style: fonts.bodyMedium?.copyWith(color: colors.onSurface),
                         ),
-                        subtitle: Text(
-                          "Cliente: ${venta.idCliente} | Usuario: ${venta.idUsuario}\nTotal: \$${venta.total.toStringAsFixed(2)}",
-                          style: textTheme.bodySmall
-                              ?.copyWith(color: colors.onPrimaryContainer),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: colors.secondary),
-                              onPressed: () => _editarVenta(venta),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: colors.error),
-                              onPressed: () => _eliminarVenta(venta.idVenta),
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  DetalleVentaScreen(idVenta: venta.idVenta),
+                      )
+                    : ListView.builder(
+                        itemCount: ventasPagina.length,
+                        itemBuilder: (context, index) {
+                          final venta = ventasPagina[index];
+                          return CustomCard(
+                            child: ListTile(
+                              leading: Icon(Icons.receipt_long,
+                                  color: colors.onPrimaryContainer),
+                              title: Text(
+                                "Venta #${venta.idVenta}",
+                                style: fonts.titleMedium?.copyWith(
+                                    color: colors.onPrimaryContainer),
+                              ),
+                              subtitle: Text(
+                                "Cliente: ${venta.idCliente} | Usuario: ${venta.idUsuario}\nTotal: \$${venta.total.toStringAsFixed(2)}",
+                                style: fonts.bodySmall
+                                    ?.copyWith(color: colors.onPrimaryContainer),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.edit,
+                                        color: colors.secondary),
+                                    onPressed: () =>
+                                        _mostrarDialogo(venta: venta),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete,
+                                        color: colors.error),
+                                    onPressed: () => _eliminarVenta(venta),
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        DetalleVentaScreen(idVenta: venta.idVenta),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
                       ),
-                    );
-                  },
+              ),
+              if (totalPages > 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: PaginacionControls(
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    onPageChanged: (page) {
+                      setState(() => currentPage = page);
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              // Widget de paginación
-              PaginacionControls(
-                currentPage: currentPage,
-                totalPages: totalPages,
-                onPageChanged: (page) {
-                  setState(() => currentPage = page);
-                },
-              ),
-              const SizedBox(height: 12),
             ],
           );
         },
