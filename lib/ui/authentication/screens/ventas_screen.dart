@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '';
 import '../../../data/services/venta_service.dart';
 import '../../../data/models/venta.dart';
 import '../../../data/models/detalle_venta.dart';
@@ -52,7 +51,7 @@ class _VentasScreenState extends State<VentasScreen> {
     await _loadVentas();
   }
 
-  /// ✅ Mostrar diálogo de crear o editar
+  //Mostrar diálogo de crear o editar
   void _mostrarDialogo({Venta? venta}) {
     final bool isEdit = venta != null;
 
@@ -202,7 +201,7 @@ class _VentasScreenState extends State<VentasScreen> {
 
           return Column(
             children: [
-              // ✅ Botón “Nueva Venta” arriba del listado
+              // Botón “Nueva Venta”
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CustomCreateButton(
