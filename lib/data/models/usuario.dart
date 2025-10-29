@@ -3,7 +3,7 @@ class Usuario {
   final String nombres;
   final String apellidos;
   final String nombreUsuario;
-  final String? contrasena; // <-- usamos "contrasena" (sin ñ) en Dart
+  final String? contrasena; 
   final int idRol;
   final int? estado;
 
@@ -23,7 +23,7 @@ class Usuario {
       nombres: json['nombres'],
       apellidos: json['apellidos'],
       nombreUsuario: json['nombreUsuario'],
-      contrasena: json['contraseña'], // 👈 Aquí seguimos leyendo "contraseña" del backend
+      contrasena: json['contraseña'], 
       idRol: json['idRol'],
       estado: json['estado'],
     );
@@ -35,7 +35,7 @@ class Usuario {
       'nombres': nombres,
       'apellidos': apellidos,
       'nombreUsuario': nombreUsuario,
-      'contraseña': contrasena, // 👈 Al enviar, también usamos la clave "contraseña"
+      'contraseña': contrasena, 
       'idRol': idRol,
       'estado': estado,
     };
