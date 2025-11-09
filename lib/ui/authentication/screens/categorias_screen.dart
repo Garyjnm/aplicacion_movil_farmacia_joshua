@@ -11,7 +11,7 @@ import 'package:auto_route/auto_route.dart';
 @RoutePage()
 class CategoriasScreen extends StatefulWidget {
   static const String routeName = '/categorias';
-  const CategoriasScreen({Key? key}) : super(key: key);
+  const CategoriasScreen({super.key});
 
   @override
   State<CategoriasScreen> createState() => _CategoriasScreenState();
