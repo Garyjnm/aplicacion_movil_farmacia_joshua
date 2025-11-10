@@ -2,7 +2,6 @@ import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/usuar
 import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'ui/authentication/screens/categorias_screen.dart';
 import 'ui/authentication/screens/ventas_screen.dart';
 import 'data/repositories/auth_repository.dart';
 
@@ -98,12 +97,7 @@ class SidebarWidget extends StatelessWidget {
                 title: Text("Categorias"),
                 onTap: () {
                   Navigator.pop(context); // Cierra el drawer
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CategoriasScreen(),
-                    ),
-                  );
+                  context.router.navigate(const CategoriasRoute());
                 },
               ),
               ListTile(
@@ -120,18 +114,18 @@ class SidebarWidget extends StatelessWidget {
           ListTile(leading: Icon(Icons.list), title: Text("Clientes")),
           //Usuarios
           ListTile(
-           leading: const Icon(Icons.people),
+            leading: const Icon(Icons.people),
             title: const Text("Usuarios"),
             onTap: () {
-           Navigator.pop(context); // 👈 Cierra el Drawer
-             Navigator.push(
+              Navigator.pop(context); // Cierra el Drawer
+              Navigator.push(
                 context,
-                   MaterialPageRoute(
-                      builder: (context) => const UsuariosScreen(),
-                   ),
-             );
-             },
-        ),
+                MaterialPageRoute(
+                  builder: (context) => const UsuariosScreen(),
+                ),
+              );
+            },
+          ),
 
           //Configuracion
           ListTile(leading: Icon(Icons.settings), title: Text("Configuracion")),
