@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'package:auto_route/auto_route.dart';
-import './home_page.dart';
+import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -68,14 +68,12 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           backgroundColor: Theme.of(context)
               .colorScheme
-              .primaryContainer, //utilizamos un color del tema para que combine con el diseño
+              .primaryContainer,
           duration: const Duration(seconds: 2),
         ),
       );
 
-      context.router.replacePath(
-        HomePage.routeName,
-      ); //navegamos a la pantalla de inicio y reemplazamos la pantalla de login
+  context.router.replaceAll([const MainLayoutRoute()]);
     } catch (e) {
       if (!mounted) {
         return; //verificamos que el widget aún esté en el árbol de widgets

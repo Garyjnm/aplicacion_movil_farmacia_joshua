@@ -1,7 +1,3 @@
-import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/home_page.dart';
-import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/login_screen.dart';
-import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/categorias_screen.dart';
-import 'package:aplicacion_movil_farmacia_joshua/ui/core/layouts/main_layout.dart';
 import 'package:auto_route/auto_route.dart';
 import '../routes/routes.gr.dart';
 import 'auth_guard.dart';
