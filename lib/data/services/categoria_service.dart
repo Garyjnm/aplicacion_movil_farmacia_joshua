@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:aplicacion_movil_farmacia_joshua/data/repositories/auth_repository.dart';
 import '../models/categoria.dart';
 
 /// Servicio para manejar las operaciones CRUD de Categoría
@@ -7,20 +6,10 @@ import '../models/categoria.dart';
 class CategoriaService {
   final Dio _dio = Dio();
   final String apiUrl = 'http://localhost:50498/api/categoria';
-  final AuthRepository _authRepository = AuthRepository();
-
-  Future<Map<String, String>> _authHeaders() async {
-    final token = await _authRepository.getAuthToken();
-    if (token.isEmpty) return {};
-    return {'Authorization': 'Bearer $token'};
-  }
 
   Future<List<Categoria>> getCategorias({int estado = 1}) async {
     try {
-      final response = await _dio.get(
-        "$apiUrl/estado/$estado",
-        options: Options(headers: await _authHeaders()),
-      );
+      final response = await _dio.get("$apiUrl/estado/$estado");
       if (response.data is List) {
         final data = response.data as List;
         return data.map((json) => Categoria.fromJson(json)).toList();
@@ -33,10 +22,7 @@ class CategoriaService {
 
   Future<Categoria> getCategoriaById(int id) async {
     try {
-      final response = await _dio.get(
-        "$apiUrl/$id",
-        options: Options(headers: await _authHeaders()),
-      );
+      final response = await _dio.get("$apiUrl/$id");
       return Categoria.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception(_mapDioError(e, 'obtener categoría'));
@@ -45,11 +31,7 @@ class CategoriaService {
 
   Future<void> addCategoria(Categoria categoria) async {
     try {
-      await _dio.post(
-        apiUrl,
-        data: categoria.toJson(),
-        options: Options(headers: await _authHeaders()),
-      );
+      await _dio.post(apiUrl, data: categoria.toJson());
     } on DioException catch (e) {
       throw Exception(_mapDioError(e, 'crear categoría'));
     }
@@ -57,11 +39,7 @@ class CategoriaService {
 
   Future<void> updateCategoria(int id, Categoria categoria) async {
     try {
-      await _dio.put(
-        "$apiUrl/$id",
-        data: categoria.toJson(),
-        options: Options(headers: await _authHeaders()),
-      );
+      await _dio.put("$apiUrl/$id", data: categoria.toJson());
     } on DioException catch (e) {
       throw Exception(_mapDioError(e, 'actualizar categoría'));
     }
@@ -69,11 +47,7 @@ class CategoriaService {
 
   Future<void> deleteCategoria(int id, {int estado = 0}) async {
     try {
-      await _dio.delete(
-        "$apiUrl/$id",
-        queryParameters: {"estado": estado},
-        options: Options(headers: await _authHeaders()),
-      );
+      await _dio.delete("$apiUrl/$id", queryParameters: {"estado": estado});
     } on DioException catch (e) {
       throw Exception(_mapDioError(e, 'eliminar categoría'));
     }
