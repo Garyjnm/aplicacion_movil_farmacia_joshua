@@ -5,6 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/categorias_screen.dart';
 import 'ui/authentication/screens/ventas_screen.dart';
+import 'ui/authentication/screens/producto_screen.dart';
 import 'data/repositories/auth_repository.dart';
 import 'ui/authentication/screens/categorias_screen.dart';
 
@@ -94,6 +95,15 @@ class SidebarWidget extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.shopping_bag),
                 title: Text("Productos"),
+                onTap: () {
+                  Navigator.pop(context); // Cierra el drawer
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProductosScreen(),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: Icon(Icons.category),

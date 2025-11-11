@@ -50,4 +50,9 @@ class AuthRepository {
       throw Exception('Error al limpiar la session local.');
     }
   }
+
+  Future<String> getAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_authTokenKey) ?? '';
+  }
 }
