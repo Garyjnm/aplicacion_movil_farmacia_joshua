@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'package:auto_route/auto_route.dart';
-import './home_page.dart';
+import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -56,42 +56,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final authResponse = await _authRepository.login(username, password);
-
-      if (!mounted) {
-        return; //verificamos que el widget aún esté en el árbol de widgets
-      }
-      //-----------Mensaje para cuando el login es correcto-----------
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!',
-          ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .primaryContainer, //utilizamos un color del tema para que combine con el diseño
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
-      context.router.replacePath(
-        HomePage.routeName,
-      ); //navegamos a la pantalla de inicio y reemplazamos la pantalla de login
+      if (!mounted) return;
+      _showSuccessSnackBar('Bienvenido(a) ${authResponse.nombres}');
+      context.router.replaceAll([const MainLayoutRoute()]);
     } catch (e) {
       if (!mounted) {
         return; //verificamos que el widget aún esté en el árbol de widgets
       }
-      //-----------Mensaje para cuando el login falla-----------
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error: ${e.toString().replaceFirst('Exception: ', '')}',
-          ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .tertiary, //utilizamos un color del tema para que combine con el diseño,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showErrorSnackBar(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) {
         setState(() {
@@ -102,9 +74,79 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // --------------------- Snackbar helpers --------------------- //
+  void _showSuccessSnackBar(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  backgroundColor: colorScheme.primaryContainer.withAlpha((0.95 * 255).round()),
+        duration: const Duration(seconds: 3),
+        content: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: colorScheme.primary,
+              radius: 16,
+              child: const Icon(Icons.check, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Login exitoso. $message',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  backgroundColor: colorScheme.errorContainer.withAlpha((0.95 * 255).round()),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: colorScheme.error,
+              radius: 16,
+              child: const Icon(
+                Icons.error_outline,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Error: $message',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -149,7 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Nombre de usuario',
                   hintText: 'Ingrese su nombre de usuario',
                   prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8), //borde redondeado
                   ),
@@ -180,7 +224,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Contraseña',
                   hintText: 'Ingrese su contraseña',
                   prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),

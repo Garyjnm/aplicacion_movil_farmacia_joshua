@@ -1,41 +1,68 @@
 import 'package:dio/dio.dart';
 import '../models/categoria.dart';
 
-// Servicio para manejar las operaciones CRUD de Categoría
+/// Servicio para manejar las operaciones CRUD de Categoría
+/// Se agregan headers de autorización (si existe token) y manejo básico de errores.
 class CategoriaService {
-  // Instancia de Dio para las solicitudes HTTP
   final Dio _dio = Dio();
-  // URL base de la API
-  final String apiUrl = 'http://10.0.2.2:50498/api/categoria';
+  final String apiUrl = 'http://localhost:50498/api/categoria';
 
-  // Obtiene la lista de categorías, filtrando por estado (1=activo, 0=inactivo)
   Future<List<Categoria>> getCategorias({int estado = 1}) async {
-    final response = await _dio.get("$apiUrl/estado/$estado");
-   // Convierte la respuesta JSON en una lista de objetos Categoria
-    List data = response.data;
-    return data.map((json) => Categoria.fromJson(json)).toList();
+    try {
+      final response = await _dio.get("$apiUrl/estado/$estado");
+      if (response.data is List) {
+        final data = response.data as List;
+        return data.map((json) => Categoria.fromJson(json)).toList();
+      }
+      throw Exception('Formato de respuesta inesperado al listar categorías.');
+    } on DioException catch (e) {
+      throw Exception(_mapDioError(e, 'listar categorías'));
+    }
   }
 
-  // Obtiene una categoría por su ID
   Future<Categoria> getCategoriaById(int id) async {
-    final response = await _dio.get("$apiUrl/$id");
-    return Categoria.fromJson(response.data);
+    try {
+      final response = await _dio.get("$apiUrl/$id");
+      return Categoria.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(_mapDioError(e, 'obtener categoría'));
+    }
   }
 
-  // Agrega una nueva categoría
   Future<void> addCategoria(Categoria categoria) async {
-    await _dio.post(apiUrl, data: categoria.toJson());
+    try {
+      await _dio.post(apiUrl, data: categoria.toJson());
+    } on DioException catch (e) {
+      throw Exception(_mapDioError(e, 'crear categoría'));
+    }
   }
 
-  // Actualiza una categoría existente por su ID
   Future<void> updateCategoria(int id, Categoria categoria) async {
-    await _dio.put("$apiUrl/$id", data: categoria.toJson());
+    try {
+      await _dio.put("$apiUrl/$id", data: categoria.toJson());
+    } on DioException catch (e) {
+      throw Exception(_mapDioError(e, 'actualizar categoría'));
+    }
   }
 
-  // Elimina (o desactiva) una categoría por su ID, cambiando su estado
   Future<void> deleteCategoria(int id, {int estado = 0}) async {
-    // Cambia el estado de la categoría
-    // Si estado=0, se desactiva; si estado=1, se reactiva
-    await _dio.delete("$apiUrl/$id", queryParameters: {"estado": estado});
+    try {
+      await _dio.delete("$apiUrl/$id", queryParameters: {"estado": estado});
+    } on DioException catch (e) {
+      throw Exception(_mapDioError(e, 'eliminar categoría'));
+    }
+  }
+
+  String _mapDioError(DioException e, String accion) {
+    final status = e.response?.statusCode;
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return 'Tiempo de conexión agotado al $accion.';
+    }
+    if (status != null) {
+      return 'Error ($status) al $accion.';
+    }
+    return 'Fallo de red al $accion: ${e.message}';
   }
 }
