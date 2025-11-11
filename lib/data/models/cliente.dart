@@ -1,24 +1,35 @@
-class Cliente {
-  final int id;
+class ClienteModel {
+  final int? idCliente;
   final String nombre;
-  final String direccion;
-  final String telefono;
+  final String apellido;
 
-  Cliente({
-    required this.id,
+  ClienteModel({
+    this.idCliente,
     required this.nombre,
-    required this.direccion,
-    required this.telefono,
+    required this.apellido,
   });
+  
 
-  factory Cliente.fromJson(Map<String, dynamic> json) {
-    return Cliente(
-      id: json['id'],
-      nombre: json['nombre'],
-      direccion: json['direccion'],
-      telefono: json['telefono'],
-    );
+  factory ClienteModel.fromJson(Map<String, dynamic> json) {
+  return ClienteModel(
+    idCliente: json['idCliente'] ?? json['IdCliente'],
+    nombre: json['nombre'] ?? json['Nombre'] ?? '',
+    apellido: json['apellido'] ?? json['Apellido'] ?? '',
+  );
+}
+
+
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{
+      'Nombre': nombre,
+      'Apellido': apellido,
+    };
+    
+    if (idCliente != null && idCliente! > 0) {
+      data["IdCliente"] = idCliente; 
+    }
+    
+    return data;
   }
-
-  String get nombreCompleto => '$nombre $direccion';
 }

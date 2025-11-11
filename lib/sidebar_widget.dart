@@ -1,3 +1,4 @@
+import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/clientes_screen.dart';
 import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/usuarios_screen.dart';
 import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 import 'package:auto_route/auto_route.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'ui/authentication/screens/categorias_screen.dart';
 import 'ui/authentication/screens/ventas_screen.dart';
 import 'data/repositories/auth_repository.dart';
+import 'ui/authentication/screens/categorias_screen.dart';
 
 
 class SidebarWidget extends StatelessWidget {
@@ -117,7 +119,19 @@ class SidebarWidget extends StatelessWidget {
             ],
           ),
           //Clientes
-          ListTile(leading: Icon(Icons.list), title: Text("Clientes")),
+          ListTile(leading: Icon(Icons.list), 
+          title: Text("Clientes"),
+          onTap: () {
+           Navigator.pop(context); // 👈 Cierra el Drawer
+              Navigator.push(
+                  context,
+                    MaterialPageRoute(
+                        builder: (context) => const ClientesScreen(),
+                    ),
+              );
+             },
+          ),
+          
           //Usuarios
           ListTile(
            leading: const Icon(Icons.people),
