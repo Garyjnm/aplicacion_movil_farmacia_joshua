@@ -56,40 +56,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final authResponse = await _authRepository.login(username, password);
-
-      if (!mounted) {
-        return; //verificamos que el widget aún esté en el árbol de widgets
-      }
-      //-----------Mensaje para cuando el login es correcto-----------
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!',
-          ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .primaryContainer,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
-  context.router.replaceAll([const MainLayoutRoute()]);
+      if (!mounted) return;
+      _showSuccessSnackBar('Bienvenido(a) ${authResponse.nombres}');
+      context.router.replaceAll([const MainLayoutRoute()]);
     } catch (e) {
       if (!mounted) {
         return; //verificamos que el widget aún esté en el árbol de widgets
       }
-      //-----------Mensaje para cuando el login falla-----------
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error: ${e.toString().replaceFirst('Exception: ', '')}',
-          ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .tertiary, //utilizamos un color del tema para que combine con el diseño,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showErrorSnackBar(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) {
         setState(() {
@@ -98,6 +72,73 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     }
+  }
+
+  // --------------------- Snackbar helpers --------------------- //
+  void _showSuccessSnackBar(String message) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  backgroundColor: cs.primaryContainer.withAlpha((0.95 * 255).round()),
+        duration: const Duration(seconds: 3),
+        content: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: cs.primary,
+              radius: 16,
+              child: const Icon(Icons.check, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Login exitoso. $message',
+                style: tt.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  backgroundColor: cs.errorContainer.withAlpha((0.95 * 255).round()),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: cs.error,
+              radius: 16,
+              child: const Icon(Icons.error_outline, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Error: $message',
+                style: tt.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
