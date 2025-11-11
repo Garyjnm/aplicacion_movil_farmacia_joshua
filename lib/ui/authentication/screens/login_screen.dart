@@ -76,19 +76,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // --------------------- Snackbar helpers --------------------- //
   void _showSuccessSnackBar(String message) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  backgroundColor: cs.primaryContainer.withAlpha((0.95 * 255).round()),
+  backgroundColor: colorScheme.primaryContainer.withAlpha((0.95 * 255).round()),
         duration: const Duration(seconds: 3),
         content: Row(
           children: [
             CircleAvatar(
-              backgroundColor: cs.primary,
+              backgroundColor: colorScheme.primary,
               radius: 16,
               child: const Icon(Icons.check, color: Colors.white, size: 18),
             ),
@@ -96,9 +96,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Expanded(
               child: Text(
                 'Login exitoso. $message',
-                style: tt.bodyMedium?.copyWith(
+                style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: cs.onPrimaryContainer,
+                  color: colorScheme.onPrimaryContainer,
                 ),
               ),
             ),
@@ -109,29 +109,33 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showErrorSnackBar(String message) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  backgroundColor: cs.errorContainer.withAlpha((0.95 * 255).round()),
+  backgroundColor: colorScheme.errorContainer.withAlpha((0.95 * 255).round()),
         duration: const Duration(seconds: 4),
         content: Row(
           children: [
             CircleAvatar(
-              backgroundColor: cs.error,
+              backgroundColor: colorScheme.error,
               radius: 16,
-              child: const Icon(Icons.error_outline, color: Colors.white, size: 18),
+              child: const Icon(
+                Icons.error_outline,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Error: $message',
-                style: tt.bodyMedium?.copyWith(
+                style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: cs.onErrorContainer,
+                  color: colorScheme.onErrorContainer,
                 ),
               ),
             ),
@@ -143,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -188,7 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Nombre de usuario',
                   hintText: 'Ingrese su nombre de usuario',
                   prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8), //borde redondeado
                   ),
@@ -219,7 +224,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: 'Contraseña',
                   hintText: 'Ingrese su contraseña',
                   prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
+                  labelStyle: textTheme.bodySmall!.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
