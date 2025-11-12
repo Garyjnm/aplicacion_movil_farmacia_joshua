@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../data/services/venta_service.dart';
+import '../../../data/services/cliente_service.dart'; 
+import '../../../data/services/producto_service.dart'; 
 import '../../../data/models/venta.dart';
+import '../../../data/models/cliente.dart'; 
+import '../../../data/models/producto.dart'; 
 import '../../core/widgets/custom_card.dart';
 
 class DetalleVentaScreen extends StatefulWidget {
@@ -12,14 +16,62 @@ class DetalleVentaScreen extends StatefulWidget {
 }
 
 class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
-  final VentaService service = VentaService();
-  late Future<Venta> _venta;
+  final VentaService _ventaService = VentaService();
+  final ClientesService _clienteService = ClientesService(); 
+  final ProductoService _productoService = ProductoService(); 
+
+  late Future<Map<String, dynamic>> _loadFuture;
+
+  Venta? _venta;
+  List<ClienteModel> _clientes = [];
+  List<ProductoModel> _productos = [];
 
   @override
   void initState() {
     super.initState();
-    _venta = service.fetchDetalle(widget.idVenta);
+    _loadFuture = _loadAllData();
   }
+
+  Future<Map<String, dynamic>> _loadAllData() async {
+    final ventaFuture = _ventaService.fetchDetalle(widget.idVenta);
+    final clientesFuture = _clienteService.getClientes();
+    final productosFuture = _productoService.getProductos();
+
+    final results = await Future.wait([ventaFuture, clientesFuture, productosFuture]);
+
+    if (!mounted) return {}; 
+
+    setState(() {
+      _venta = results[0] as Venta;
+      _clientes = results[1] as List<ClienteModel>;
+      _productos = results[2] as List<ProductoModel>;
+    });
+
+    return {
+      'venta': _venta,
+      'clientes': _clientes,
+      'productos': _productos,
+    };
+  }
+
+  String _getNombreCliente(int idCliente) {
+    try {
+      final cliente = _clientes.firstWhere((c) => c.idCliente == idCliente);
+      return '${cliente.nombre} ${cliente.apellido}';
+    } catch (_) {
+      return 'Cliente Desconocido ($idCliente)';
+    }
+  }
+
+  String _getNombreProducto(int idProducto) {
+    try {
+      final producto = _productos.firstWhere((p) => p.almcId == idProducto); 
+      return producto.nombreProducto ?? 'Producto Sin Nombre'; 
+    } catch (_) {
+      return 'Producto Desconocido ($idProducto)';
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -31,17 +83,20 @@ class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
         title: const Text("Detalle de Venta"),
         backgroundColor: colors.primaryContainer,
       ),
-      body: FutureBuilder<Venta>(
-        future: _venta,
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _loadFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+          if (snapshot.hasError || !snapshot.hasData || _venta == null) {
+            return Center(child: Text('Error al cargar datos: ${snapshot.error ?? "Datos no encontrados"}'));
           }
 
-          final venta = snapshot.data!;
+          final venta = _venta!; 
+          
+          final nombreCliente = _getNombreCliente(venta.idCliente);
+          
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -55,7 +110,7 @@ class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text("Cliente: ${venta.idCliente}",
+                Text("Cliente: $nombreCliente",
                     style: TextStyle(color: colors.onPrimaryContainer)),
                 Text("Usuario: ${venta.idUsuario}",
                     style: TextStyle(color: colors.onPrimaryContainer)),
@@ -78,17 +133,17 @@ class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
                     itemCount: venta.ventaDetalle.length,
                     itemBuilder: (context, index) {
                       final detalle = venta.ventaDetalle[index];
+                      final nombreProducto = _getNombreProducto(detalle.idProducto);
+
                       return CustomCard(
                         child: ListTile(
                           title: Text(
-                            "Producto #${detalle.idProducto}",
-                            style:
-                                TextStyle(color: colors.onPrimaryContainer),
+                            nombreProducto,
+                            style: TextStyle(color: colors.onPrimaryContainer),
                           ),
                           subtitle: Text(
                             "Cantidad: ${detalle.cantidad} - Precio: \$${detalle.precioUnitario.toStringAsFixed(2)}",
-                            style:
-                                TextStyle(color: colors.onPrimaryContainer),
+                            style: TextStyle(color: colors.onPrimaryContainer),
                           ),
                           trailing: Text(
                             "Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}",

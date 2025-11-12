@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import '../models/venta.dart';
 
 class VentaService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:50498/api'));
+  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:50498/api')); 
 
   Future<List<Venta>> fetchVentas() async {
     final response = await _dio.get('/venta');
@@ -16,73 +16,82 @@ class VentaService {
   }
 
   Future<Venta?> createVenta(Venta venta) async {
-    final response = await _dio.post('/venta', data: {
-      'idCliente': venta.idCliente,
-      'idUsuario': venta.idUsuario,
-      'fechaVenta': venta.fechaVenta.toIso8601String(),
-      'total': venta.total,
-      'ventaDetalle': venta.ventaDetalle
-          .map((d) => {
-                'idProducto': d.idProducto,
-                'cantidad': d.cantidad,
-                'precioUnitario': d.precioUnitario,
-                'subtotal': d.subtotal,
-              })
-          .toList(),
-    });
-
     try {
-      final data = response.data;
+      final response = await _dio.post('/venta', data: {
+        'idCliente': venta.idCliente,
+        'idUsuario': venta.idUsuario,
+        'fechaVenta': venta.fechaVenta.toIso8601String(),
+        'total': venta.total,
+        'ventaDetalle': venta.ventaDetalle
+            .map((d) => {
+                  'idProducto': d.idProducto,
+                  'cantidad': d.cantidad,
+                  'precioUnitario': d.precioUnitario,
+                  'subtotal': d.subtotal,
+                })
+            .toList(),
+      });
 
-      if (data is String) {
-        print('Respuesta texto (createVenta): $data');
-        return null;
+      if (response.data is Map<String, dynamic>) {
+        return Venta.fromJson(response.data);
       }
-
-      if (data is Map<String, dynamic>) {
-        return Venta.fromJson(data);
-      }
-
-      print('Respuesta inesperada (createVenta): $data');
       return null;
+
+    } on DioException catch (e) {
+      String errorMessage = 'Error de conexión. Verifica el servidor.';
+      if (e.response != null) {
+        errorMessage = 'Error del servidor (${e.response!.statusCode}): ${e.response!.data.toString()}';
+      }
+      throw Exception(errorMessage); 
     } catch (e) {
-      print('Error procesando respuesta createVenta: $e');
-      rethrow;
+      throw Exception('Error desconocido al crear la venta: $e');
     }
   }
 
   Future<Venta?> updateVenta(Venta venta) async {
-    final response = await _dio.put('/venta/${venta.idVenta}', data: {
-      'idCliente': venta.idCliente,
-      'idUsuario': venta.idUsuario,
-      'fechaVenta': venta.fechaVenta.toIso8601String(),
-      'total': venta.total,
-      'ventaDetalle': venta.ventaDetalle
-          .map((d) => {
-                'idProducto': d.idProducto,
-                'cantidad': d.cantidad,
-                'precioUnitario': d.precioUnitario,
-                'subtotal': d.subtotal,
-              })
-          .toList(),
-    });
+    try {
+      final response = await _dio.put('/venta/${venta.idVenta}', data: {
+        'idVenta': venta.idVenta, 
+        'idCliente': venta.idCliente,
+        'idUsuario': venta.idUsuario,
+        'fechaVenta': venta.fechaVenta.toIso8601String(),
+        'total': venta.total,
+        'ventaDetalle': venta.ventaDetalle
+            .map((d) => {
+                  'idDetalleVenta': d.idDetalleVenta, 
+                  'idProducto': d.idProducto,
+                  'cantidad': d.cantidad,
+                  'precioUnitario': d.precioUnitario,
+                  'subtotal': d.subtotal,
+                })
+            .toList(),
+      });
 
-    final data = response.data;
-
-    if (data is String) {
-      print('Respuesta texto (updateVenta): $data');
+      if (response.data is Map<String, dynamic>) {
+        return Venta.fromJson(response.data);
+      }
       return null;
-    }
 
-    if (data is Map<String, dynamic>) {
-      return Venta.fromJson(data);
+    } on DioException catch (e) {
+      String errorMessage = 'Error de conexión. Verifica el servidor.';
+      if (e.response != null) {
+        errorMessage = 'Error del servidor (${e.response!.statusCode}): ${e.response!.data.toString()}';
+      }
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception('Error desconocido al actualizar la venta: $e');
     }
-
-    print('Respuesta inesperada en updateVenta: $data');
-    return null;
   }
 
   Future<void> deleteVenta(int idVenta) async {
-    await _dio.delete('/venta/$idVenta');
+    try {
+      await _dio.delete('/venta/$idVenta');
+    } on DioException catch (e) {
+      String errorMessage = 'Error al eliminar. Verifica el servidor.';
+      if (e.response != null) {
+        errorMessage = 'Error del servidor (${e.response!.statusCode}): ${e.response!.data.toString()}';
+      }
+      throw Exception(errorMessage);
+    }
   }
 }
