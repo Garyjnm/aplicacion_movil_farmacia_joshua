@@ -29,21 +29,21 @@ class ProductoModel {
 
   factory ProductoModel.fromJson(Map<String, dynamic> json) {
     return ProductoModel(
-      almcId: json['Almc_Id'] as int?,
-      almcDetalleId: json['Almc_Detalle_Id'] as int?,
+      almcId: json['almc_Id'] as int?,
+      almcDetalleId: json['almc_Detalle_Id'] as int?,
       almcProveedorId: json['Almc_Proveedor_Id'] as int?,
-      almcLote: (json['Almc_Lote'] as String?) ?? '',
-      almcExistencia: json['Almc_Existencia'] as int?,
-      almcPrecioCompra: (json['Almc_PrecioCompra'] as num?)?.toDouble(),
-      almcPrecioVenta: (json['Almc_PrecioVenta'] as num?)?.toDouble(),
-      almcEstado: json['Almc_Estado'] is bool 
-          ? (json['Almc_Estado'] as bool?) 
+      almcLote: (json['almc_Lote'] as String?) ?? '',
+      almcExistencia: json['almc_Existencia'] as int?,
+      almcPrecioCompra: (json['almc_PrecioCompra'] as num?)?.toDouble(),
+      almcPrecioVenta: (json['almc_PrecioVenta'] as num?)?.toDouble(),
+      almcEstado: json['almc_Estado'] is bool 
+          ? (json['almc_Estado'] as bool?) 
           : (json['Almc_Estado'] is int ? (json['Almc_Estado'] == 1) : null),
 
-      nombreProducto: (json['NombreProducto'] as String?) ?? 'N/D', 
-      detalleDescripcion: (json['Detalle_Descripcion'] as String?) ?? 'N/D', 
-      detalleFechaVencimiento: json['Detalle_FechaVencimiento'] != null 
-          ? DateTime.tryParse(json['Detalle_FechaVencimiento'].toString()) 
+      nombreProducto: (json['nombreProducto'] as String?) ?? 'N/D', 
+      detalleDescripcion: (json['detalle_Descripcion'] as String?) ?? 'N/D', 
+      detalleFechaVencimiento: json['detalle_FechaVencimiento'] != null
+          ? DateTime.tryParse(json['detalle_FechaVencimiento'].toString()) 
           : null,
     );
   }

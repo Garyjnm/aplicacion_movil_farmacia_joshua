@@ -112,7 +112,6 @@ class _ProductosScreenState extends State<ProductosScreen> {
         ],
       ),
       onSave: () async {
-        // Asume que estos IDs son fijos o se obtienen de otro selector
         final int detalleId = producto?.almcDetalleId ?? 1; 
         final int proveedorId = producto?.almcProveedorId ?? 1;
 

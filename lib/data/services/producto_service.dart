@@ -38,17 +38,14 @@ class ProductoService {
     }
   }
 
-  // PUT: Actualizar un producto (usa el ID en la ruta)
   Future<void> updateProducto(int id, ProductoModel producto) async {
     try {
-      // Tu controlador C# usa PUT /api/ProductoAlmacenado/{id}
       await _dio.put('$apiUrl/$id', data: producto.toJson());
     } on DioException catch (e) {
       throw Exception('Error al actualizar: ${e.message}');
     }
   }
 
-  // DELETE: Eliminar un producto (usa el ID en la ruta)
   Future<void> deleteProducto(int id) async {
     try {
       await _dio.delete('$apiUrl/$id');
