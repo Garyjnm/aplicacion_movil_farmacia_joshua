@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Muestra un diálogo reutilizable con acciones de Guardar/Cancelar.
-/// Ahora espera el Future del callback onSave antes de cerrar el diálogo
-/// para evitar que se perciba una 'navegación' prematura mientras se ejecuta
-/// una operación HTTP. También maneja errores mostrando un SnackBar.
+
 Future<void> showCustomDialog({
   required BuildContext context,
   required String title,
