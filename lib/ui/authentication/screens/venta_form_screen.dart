@@ -416,7 +416,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit),
-                            onPressed: () => _editarCantidadIndex(index), // Usa showCustomDialog
+                            onPressed: () => _editarCantidadIndex(index), 
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
