@@ -65,7 +65,15 @@ class SidebarWidget extends StatelessWidget {
           ),
           //Elementos del sidebar
           //Home
-          ListTile(leading: Icon(Icons.home), title: Text("Home")),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text("Home"),
+            onTap: () {
+              Navigator.pop(context); // Cierra el Drawer
+              // Navega al Home dentro del layout usando AutoRoute
+              context.router.replace(const HomeRoute());
+            },
+          ),
           //Ventas
           ListTile(
             leading: Icon(Icons.receipt_long),
