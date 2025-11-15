@@ -18,9 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _usernameController = TextEditingController(
     text: '',
-  ); //este controlador nos permite obtener el texto del campo de usuario
+  );
   final TextEditingController _passwordController =
-      TextEditingController(); //este controlador nos permite obtener el texto del campo de contraseña
+      TextEditingController(); 
 
   // Focus nodes y banderas para controlar cuándo mostrar errores (solo después de que el usuario toque y salga del campo)
   final FocusNode _usernameFocus = FocusNode();
@@ -31,8 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
 
-  bool _isLoading = false; //nuevo estado para controlar la animación del botón
-  bool _isFormValid = false; // control para habilitar el botón sin depender de dismiss keyboard
+  bool _isLoading = false;
+  bool _isFormValid = false; 
 
   @override
   void initState() {
@@ -63,9 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _usernameController
-        .dispose(); //liberamos los recursos del controlador cuando ya no se necesita
+        .dispose(); 
     _passwordController
-        .dispose(); //liberamos los recursos del controlador cuando ya no se necesita
+        .dispose(); 
     _usernameFocus.dispose();
     _passwordFocus.dispose();
     super.dispose();
@@ -82,10 +82,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() async {
     final username =
-        _usernameController.text; //obtenemos el texto del campo de usuario
+        _usernameController.text; 
     final password =
-        _passwordController.text; //obtenemos el texto del campo de contraseña
-
+        _passwordController.text; 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -98,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() {
       _isLoading =
-          true; //iniciamos el estado de carga y deshabilitamos el botón
+          true;
     });
 
     try {
@@ -108,14 +107,14 @@ class _LoginScreenState extends State<LoginScreen> {
       context.router.replaceAll([const MainLayoutRoute()]);
     } catch (e) {
       if (!mounted) {
-        return; //verificamos que el widget aún esté en el árbol de widgets
+        return;
       }
       _showErrorSnackBar(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) {
         setState(() {
           _isLoading =
-              false; //finalizamos el estado de carga y habilitamos el botón
+              false;
         });
       }
     }
@@ -130,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  backgroundColor: colorScheme.primaryContainer.withAlpha((0.95 * 255).round()),
+        backgroundColor: colorScheme.primaryContainer.withAlpha((0.95 * 255).round()),
         duration: const Duration(seconds: 3),
         content: Row(
           children: [
@@ -163,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  backgroundColor: colorScheme.errorContainer.withAlpha((0.95 * 255).round()),
+        backgroundColor: colorScheme.errorContainer.withAlpha((0.95 * 255).round()),
         duration: const Duration(seconds: 4),
         content: Row(
           children: [
