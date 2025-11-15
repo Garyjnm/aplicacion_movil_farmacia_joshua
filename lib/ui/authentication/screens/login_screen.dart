@@ -22,7 +22,43 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController =
       TextEditingController(); //este controlador nos permite obtener el texto del campo de contraseña
 
+  // Focus nodes y banderas para controlar cuándo mostrar errores (solo después de que el usuario toque y salga del campo)
+  final FocusNode _usernameFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+
+  bool _usernameTouched = false;
+  bool _passwordTouched = false;
+
+  bool _obscurePassword = true;
+
   bool _isLoading = false; //nuevo estado para controlar la animación del botón
+  bool _isFormValid = false; // control para habilitar el botón sin depender de dismiss keyboard
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Cuando el foco se pierde marcaremos el campo como "tocado" para mostrar errores
+    _usernameFocus.addListener(() {
+      if (!_usernameFocus.hasFocus) {
+        setState(() {
+          _usernameTouched = true;
+        });
+      }
+    });
+
+    _passwordFocus.addListener(() {
+      if (!_passwordFocus.hasFocus) {
+        setState(() {
+          _passwordTouched = true;
+        });
+      }
+    });
+
+    // Escuchar cambios para actualizar el estado del botón inmediatamente
+    _usernameController.addListener(_updateFormValidity);
+    _passwordController.addListener(_updateFormValidity);
+  }
 
   @override
   void dispose() {
@@ -30,7 +66,18 @@ class _LoginScreenState extends State<LoginScreen> {
         .dispose(); //liberamos los recursos del controlador cuando ya no se necesita
     _passwordController
         .dispose(); //liberamos los recursos del controlador cuando ya no se necesita
+    _usernameFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
+  }
+
+  void _updateFormValidity() {
+    final valid = _usernameController.text.trim().length >= 3 && _passwordController.text.length >= 3;
+    if (valid != _isFormValid) {
+      setState(() {
+        _isFormValid = valid;
+      });
+    }
   }
 
   void _login() async {
@@ -179,76 +226,112 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // ------Apartado de Usuario---------
-              TextField(
-                controller:
-                    _usernameController, //asociamos el controlador al campo de texto
-                style: textTheme.bodyMedium!.copyWith(
-                  color: colorScheme.onSurface, //color del texto según el tema
-                  fontSize: 16,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Nombre de usuario',
-                  hintText: 'Ingrese su nombre de usuario',
-                  prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8), //borde redondeado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: colorScheme
-                          .secondaryContainer, //color del borde según el tema
-                      width: 2, //grosor del borde
+              // ------Formulario de login (validación mostrada solo tras tocar y salir del campo)---------
+              Form(
+                // Usamos AutovalidateMode.always pero los validators solo mostrarán
+                // errores si el campo ha sido tocado (focus lost). Esto evita errores
+                // inmediatos al entrar a la pantalla.
+                autovalidateMode: AutovalidateMode.always,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _usernameController,
+                      focusNode: _usernameFocus,
+                      textInputAction: TextInputAction.next,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface,
+                        fontSize: 16,
+                      ),
+                      validator: (value) {
+                        if (!_usernameTouched) return null;
+                        final String usernameValue = value?.trim() ?? '';
+                        if (usernameValue.isEmpty) return 'Por favor ingrese su usuario';
+                        if (usernameValue.length < 3) return 'El usuario debe tener al menos 3 caracteres';
+                        return null;
+                      },
+                      onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+                      decoration: InputDecoration(
+                        labelText: 'Nombre de usuario',
+                        hintText: 'Ingrese su nombre de usuario',
+                        prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
+                        errorStyle: TextStyle(color: colorScheme.error),
+                        labelStyle: textTheme.bodySmall!.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: colorScheme.secondaryContainer,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 10,
+                        ),
+                      ),
                     ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 10,
-                  ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                      validator: (value) {
+                        if (!_passwordTouched) return null;
+                        final String passwordValue = value ?? '';
+                        if (passwordValue.isEmpty) return 'Por favor ingrese su contraseña';
+                        if (passwordValue.length < 3) return 'La contraseña debe tener al menos 3 caracteres';
+                        return null;
+                      },
+                      onFieldSubmitted: (_) {
+                        if (_isFormValid && !_isLoading) _login();
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña',
+                        hintText: 'Ingrese su contraseña',
+                        prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
+                        errorStyle: TextStyle(color: colorScheme.error),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: colorScheme.onSurface,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                        labelStyle: textTheme.bodySmall!.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: colorScheme.secondaryContainer,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 10,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // ------Apartado de Contraseña---------
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                style: textTheme.bodyMedium!.copyWith(
-                  color: colorScheme.onSurface, //color del texto según el tema
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  hintText: 'Ingrese su contraseña',
-                  prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: colorScheme
-                          .secondaryContainer, //color del borde según el tema
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 10,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
 
               // ------Boton de login---------
               ElevatedButton(
-                onPressed: _isLoading ? null : _login,
+                onPressed: (_isLoading || !_isFormValid) ? null : _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme
                       .secondaryContainer, //color del botón según el tema

@@ -11,8 +11,9 @@ final ColorScheme _lightColorScheme = const ColorScheme(
   secondaryContainer: Color(0xFF6D8D9F),
   onSecondaryContainer: Color(0xFFF4F4F4),
   tertiary: Color(0xFF4D0A0F),
-  error: Color(0xFFE6F2F9),
-  onError: Color(0xFF4D0A0F),
+  // Color de error usado para validaciones/alerts. Antes estaba demasiado claro y no se veía.
+  error: Color(0xFFB00020), // rojo material para errores
+  onError: Color(0xFFFFFFFF),
   surface: Color(0xFFF4F4F4),
   onSurface: Color(0xFF1B194B),
 );
