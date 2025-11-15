@@ -166,35 +166,30 @@ class _ProductosScreenState extends State<ProductosScreen> {
     final endIndex = (_currentPage * _itemsPerPage).clamp(0, _filteredProductos.length);
     final productosPagina = _filteredProductos.sublist(startIndex, endIndex);
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      appBar: AppBar(
-        backgroundColor: colors.primaryContainer,
-        title: Text(
-          "Productos",
-          style: fonts.titleLarge?.copyWith(
-            color: colors.onPrimaryContainer,
-            fontWeight: FontWeight.bold,
+    return Column(
+        children: [
+        // Barra superior con buscador y botón refrescar (opcional)
+        Padding(
+          padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  controller: _searchController,
+                  label: "Buscar producto por nombre o descripción...",
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Refrescar',
+                onPressed: _refresh,
+              ),
+            ],
           ),
         ),
-        iconTheme: IconThemeData(color: colors.onPrimaryContainer),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
           // Campo de búsqueda
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CustomTextField(
-              controller: _searchController, 
-              label: "Buscar producto por nombre o descripción...",
-            ),
-          ),
+        // (Ya integrado arriba en la fila)
           // Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -204,7 +199,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
             ),
           ),
           // Lista de productos
-          Expanded(
+        Expanded(
             child: FutureBuilder<List<ProductoModel>>(
               future: _futureProductos,
               builder: (context, snapshot) {
@@ -291,7 +286,6 @@ class _ProductosScreenState extends State<ProductosScreen> {
               ),
             ),
         ],
-      ),
-    );
+      );
   }
 }

@@ -152,35 +152,28 @@ class _ClientesScreenState extends State<ClientesScreen> {
     final endIndex = (_currentPage * _itemsPerPage).clamp(0, _filteredClientes.length);
     final clientesPagina = _filteredClientes.sublist(startIndex, endIndex);
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      appBar: AppBar(
-        backgroundColor: colors.primaryContainer,
-        title: Text(
-          "Clientes",
-          style: fonts.titleLarge?.copyWith(
-            color: colors.onPrimaryContainer,
-            fontWeight: FontWeight.bold,
+    return Column(
+      children: [
+        // Barra superior con buscador y botón refrescar
+        Padding(
+          padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  controller: _searchController,
+                  label: "Buscar cliente por nombre o apellido...",
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Refrescar',
+                onPressed: _refresh,
+              ),
+            ],
           ),
         ),
-        iconTheme: IconThemeData(color: colors.onPrimaryContainer),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Campo de búsqueda
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CustomTextField(
-              controller: _searchController, 
-              label: "Buscar cliente por nombre o apellido...",
-            ),
-          ),
           // Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -190,8 +183,8 @@ class _ClientesScreenState extends State<ClientesScreen> {
             ),
           ),
           // Lista de clientes
-          Expanded(
-            child: FutureBuilder<List<ClienteModel>>(
+        Expanded(
+          child: FutureBuilder<List<ClienteModel>>(
               future: _futureClientes,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -235,7 +228,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
                               onPressed: () => _mostrarDialogo(cliente: cliente),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete),
+                              icon: Icon(Icons.delete, color: colors.error),
                               onPressed: () => _confirmarEliminar(cliente),
                             ),
                           ],
@@ -248,21 +241,20 @@ class _ClientesScreenState extends State<ClientesScreen> {
             ),
           ),
           // Controles de paginación
-          if (totalPages > 1)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: PaginacionControls(
-                currentPage: _currentPage,
-                totalPages: totalPages,
-                onPageChanged: (page) {
-                  setState(() {
-                    _currentPage = page;
-                  });
-                },
-              ),
+        if (totalPages > 1)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: PaginacionControls(
+              currentPage: _currentPage,
+              totalPages: totalPages,
+              onPageChanged: (page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

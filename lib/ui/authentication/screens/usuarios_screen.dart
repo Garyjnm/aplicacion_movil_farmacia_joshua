@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import '../../../data/models/usuario.dart';
 import '../../../data/services/usuarios_service.dart';
 import '../../core/widgets/paginacion_controls.dart'; // Control de paginación
@@ -8,6 +9,7 @@ import '../../core/widgets/custom_textfield.dart'; // Campo de texto personaliza
 import '../../core/widgets/custom_dialog.dart'; // Diálogo personalizado
 
 // Definimos la clase principal de la pantalla de usuarios
+@RoutePage()
 class UsuariosScreen extends StatefulWidget {
   // Constructor del widget, en este caso sin parámetros
   const UsuariosScreen({Key? key}) : super(key: key);
@@ -172,87 +174,77 @@ final UsuarioService _service = UsuarioService();
     final usuariosPagina = _filteredUsuarios.sublist(startIndex, endIndex); // Sublista de usuarios a mostrar
 
     // Construcción de la interfaz principal
-    return Scaffold(
-      backgroundColor: colors.surface, // Color de fondo
-      appBar: AppBar(
-        backgroundColor: colors.primaryContainer, // Fondo del AppBar
-        title: Text(
-          "Usuarios", // Título de la pantalla
-          style: fonts.titleLarge?.copyWith(color: colors.onPrimaryContainer, fontWeight: FontWeight.bold), // Estilo del texto
+    // Devolvemos solo el contenido para que el AppBar lo maneje el MainLayout
+    return Column(
+      children: [
+        // Campo de búsqueda superior
+        Padding(
+          padding: const EdgeInsets.all(16.0), // Margen
+          child: CustomTextField(
+            controller: _searchController, // Controlador del texto
+            label: "Buscar usuario...", // Etiqueta
+          ),
         ),
-        iconTheme: IconThemeData(color: colors.onPrimaryContainer), // Color de íconos
-      ),
-      body: Column(
-        children: [
-          // Campo de búsqueda superior
-          Padding(
-            padding: const EdgeInsets.all(16.0), // Margen
-            child: CustomTextField(
-              controller: _searchController, // Controlador del texto
-              label: "Buscar usuario...", // Etiqueta
-            ),
+        // Botón para agregar nuevo usuario
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espaciado
+          child: CustomCreateButton(
+            label: "Agregar Usuario", // Texto del botón
+            onPressed: () => _mostrarDialogo(), // Abre el diálogo
           ),
-          // Botón para agregar nuevo usuario
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espaciado
-            child: CustomCreateButton(
-              label: "Agregar Usuario", // Texto del botón
-              onPressed: () => _mostrarDialogo(), // Abre el diálogo
-            ),
-          ),
-          // Lista de usuarios
-          Expanded(
-            child: _filteredUsuarios.isEmpty // Si no hay usuarios
-                ? Center(child: Text("No hay usuarios", style: fonts.bodyMedium)) // Muestra mensaje
-                : ListView.builder( // Si hay usuarios, crea una lista
-                    itemCount: usuariosPagina.length, // Número de elementos a mostrar
-                    itemBuilder: (context, index) { // Constructor de cada ítem
-                      final usuario = usuariosPagina[index]; // Usuario actual
-                      return CustomCard( // Tarjeta personalizada
-                        child: ListTile( // Ítem de lista
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espaciado interno
-                          title: Text(
-                            "${usuario.nombres} ${usuario.apellidos}", // Nombre completo
-                            style: fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold), // Estilo en negrita
-                          ),
-                          subtitle: Text(
-                            "Usuario: ${usuario.nombreUsuario} • Rol: ${usuario.idRol}", // Subtítulo con rol
-                            style: fonts.bodyMedium, // Estilo de texto
-                          ),
-                          trailing: Row( // Acciones (editar/eliminar)
-                            mainAxisSize: MainAxisSize.min, // Ocupa solo lo necesario
-                            children: [
-                              IconButton( // Botón de editar
-                                icon: const Icon(Icons.edit), // Icono de lápiz
-                                onPressed: () => _mostrarDialogo(usuario: usuario), // Abre diálogo de edición
-                              ),
-                              IconButton( // Botón de eliminar
-                                icon: const Icon(Icons.delete), // Icono de basurero
-                                onPressed: () => _confirmarEliminar(usuario), // Llama al método eliminar
-                              ),
-                            ],
-                          ),
+        ),
+        // Lista de usuarios
+        Expanded(
+          child: _filteredUsuarios.isEmpty // Si no hay usuarios
+              ? Center(child: Text("No hay usuarios", style: fonts.bodyMedium)) // Muestra mensaje
+              : ListView.builder( // Si hay usuarios, crea una lista
+                  itemCount: usuariosPagina.length, // Número de elementos a mostrar
+                  itemBuilder: (context, index) { // Constructor de cada ítem
+                    final usuario = usuariosPagina[index]; // Usuario actual
+                    return CustomCard( // Tarjeta personalizada
+                      child: ListTile( // Ítem de lista
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espaciado interno
+                        title: Text(
+                          "${usuario.nombres} ${usuario.apellidos}", // Nombre completo
+                          style: fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold), // Estilo en negrita
                         ),
-                      );
-                    },
-                  ),
-          ),
-          // Controles de paginación
-          if (totalPages > 1) // Solo si hay más de una página
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8), // Espaciado
-              child: PaginacionControls(
-                currentPage: _currentPage, // Página actual
-                totalPages: totalPages, // Total de páginas
-                onPageChanged: (page) { // Callback al cambiar de página
-                  setState(() {
-                    _currentPage = page; // Actualiza la página
-                  });
-                },
-              ),
+                        subtitle: Text(
+                          "Usuario: ${usuario.nombreUsuario} • Rol: ${usuario.idRol}", // Subtítulo con rol
+                          style: fonts.bodyMedium, // Estilo de texto
+                        ),
+                        trailing: Row( // Acciones (editar/eliminar)
+                          mainAxisSize: MainAxisSize.min, // Ocupa solo lo necesario
+                          children: [
+                            IconButton( // Botón de editar
+                              icon: const Icon(Icons.edit), // Icono de lápiz
+                              onPressed: () => _mostrarDialogo(usuario: usuario), // Abre diálogo de edición
+                            ),
+                            IconButton( // Botón de eliminar
+                              icon: Icon(Icons.delete, color: colors.error), // Icono de basurero
+                              onPressed: () => _confirmarEliminar(usuario), // Llama al método eliminar
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        // Controles de paginación
+        if (totalPages > 1) // Solo si hay más de una página
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8), // Espaciado
+            child: PaginacionControls(
+              currentPage: _currentPage, // Página actual
+              totalPages: totalPages, // Total de páginas
+              onPageChanged: (page) { // Callback al cambiar de página
+                setState(() {
+                  _currentPage = page; // Actualiza la página
+                });
+              },
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

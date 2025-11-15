@@ -1,12 +1,8 @@
-import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/clientes_screen.dart';
-import 'package:aplicacion_movil_farmacia_joshua/ui/authentication/screens/usuarios_screen.dart';
 import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/ventas_screen.dart';
-import 'ui/authentication/screens/producto_screen.dart';
 import 'data/repositories/auth_repository.dart';
-import 'ui/authentication/screens/categorias_screen.dart';
 
 
 class SidebarWidget extends StatelessWidget {
@@ -104,12 +100,7 @@ class SidebarWidget extends StatelessWidget {
                 title: Text("Productos"),
                 onTap: () {
                   Navigator.pop(context); // Cierra el drawer
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProductosScreen(),
-                    ),
-                  );
+                  context.router.replace(const ProductosRoute());
                 },
               ),
               ListTile(
@@ -131,17 +122,13 @@ class SidebarWidget extends StatelessWidget {
             ],
           ),
           //Clientes
-          ListTile(leading: Icon(Icons.list), 
-          title: Text("Clientes"),
-          onTap: () {
-           Navigator.pop(context); // 👈 Cierra el Drawer
-              Navigator.push(
-                  context,
-                    MaterialPageRoute(
-                        builder: (context) => const ClientesScreen(),
-                    ),
-              );
-             },
+          ListTile(
+            leading: Icon(Icons.list), 
+            title: Text("Clientes"),
+            onTap: () {
+              Navigator.pop(context); // Cierra el Drawer
+              context.router.replace(const ClientesRoute());
+            },
           ),
           
           //Usuarios
@@ -150,12 +137,8 @@ class SidebarWidget extends StatelessWidget {
             title: const Text("Usuarios"),
             onTap: () {
               Navigator.pop(context); // Cierra el Drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const UsuariosScreen(),
-                ),
-              );
+              // Navegar usando AutoRoute hacia la ruta hija del layout
+              context.router.replace(const UsuariosRoute());
             },
           ),
 
