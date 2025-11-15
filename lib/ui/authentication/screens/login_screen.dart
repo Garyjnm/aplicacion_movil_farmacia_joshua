@@ -72,11 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _updateFormValidity() {
-    final valid = _usernameController.text.trim().length >= 3 && _passwordController.text.length >= 3;
+    // Ahora solo requerimos que ambos campos no estén vacíos
+    final valid = _usernameController.text.trim().isNotEmpty && _passwordController.text.isNotEmpty;
     if (valid != _isFormValid) {
-      setState(() {
-        _isFormValid = valid;
-      });
+      setState(() => _isFormValid = valid);
     }
   }
 
@@ -245,7 +244,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (!_usernameTouched) return null;
                         final String usernameValue = value?.trim() ?? '';
                         if (usernameValue.isEmpty) return 'Por favor ingrese su usuario';
-                        if (usernameValue.length < 3) return 'El usuario debe tener al menos 3 caracteres';
                         return null;
                       },
                       onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
@@ -286,7 +284,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (!_passwordTouched) return null;
                         final String passwordValue = value ?? '';
                         if (passwordValue.isEmpty) return 'Por favor ingrese su contraseña';
-                        if (passwordValue.length < 3) return 'La contraseña debe tener al menos 3 caracteres';
                         return null;
                       },
                       onFieldSubmitted: (_) {
