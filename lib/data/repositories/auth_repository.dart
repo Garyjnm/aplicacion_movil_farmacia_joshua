@@ -75,26 +75,26 @@ class AuthRepository {
     final id = await getRoleId();
     return roleFromId(id);
   }
-  
+
   Future<String> getUserShortName() async {
     final prefs = await SharedPreferences.getInstance();
     final nombresRaw = (prefs.getString(_userFirstNameKey) ?? '').trim();
     final apellidosRaw = (prefs.getString(_userLastNameKey) ?? '').trim();
 
     // Obtiene el primer token (palabra) de nombres y apellidos si existen.
-    String firstNombre = '';
+    String firstName = '';
     if (nombresRaw.isNotEmpty) {
-      final partesNombre = nombresRaw.split(RegExp(r'\s+'));
-      if (partesNombre.isNotEmpty) firstNombre = partesNombre.first;
+      final name = nombresRaw.split(RegExp(r'\s+'));
+      if (name.isNotEmpty) firstName = name.first;
     }
 
-    String firstApellido = '';
+    String firstLastName = '';
     if (apellidosRaw.isNotEmpty) {
-      final partesApellido = apellidosRaw.split(RegExp(r'\s+'));
-      if (partesApellido.isNotEmpty) firstApellido = partesApellido.first;
+      final lastName = apellidosRaw.split(RegExp(r'\s+'));
+      if (lastName.isNotEmpty) firstLastName = lastName.first;
     }
 
-    final resultado = ('$firstNombre $firstApellido').trim();
+    final resultado = ('$firstName $firstLastName').trim();
     return resultado.isEmpty ? 'Usuario' : resultado;
   }
 }
