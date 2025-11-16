@@ -9,15 +9,19 @@ class AuthRepository {
 
   static const String _authTokenKey = 'auth_token';
   static const String _roleIdKey = 'role_id';
+  static const String _userFirstNameKey = 'user_first_name';
+  static const String _userLastNameKey = 'user_last_name';
 
   Future<AuthResponse> login(String username, String password) async {
     try {
       final authResponse = await _authService.authenticate(username, password);
 
-      // Guardar el token en SharedPreferences
+      // Guardar token, rol y datos básicos del usuario en SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_authTokenKey, authResponse.token);
       await prefs.setInt(_roleIdKey, authResponse.idRol);
+      await prefs.setString(_userFirstNameKey, authResponse.nombres);
+      await prefs.setString(_userLastNameKey, authResponse.apellidos);
 
       return authResponse;
     } on DioException catch (e) {
@@ -50,6 +54,8 @@ class AuthRepository {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_authTokenKey);
       await prefs.remove(_roleIdKey);
+      await prefs.remove(_userFirstNameKey);
+      await prefs.remove(_userLastNameKey);
     }catch(e){
       throw Exception('Error al limpiar la session local.');
     }
@@ -68,5 +74,33 @@ class AuthRepository {
   Future<Role> getCurrentRole() async {
     final id = await getRoleId();
     return roleFromId(id);
+  }
+
+  // Devuelve "PrimerNombre PrimerApellido" del usuario logueado.
+  // Buenas prácticas aplicadas:
+  // - Acceso único a SharedPreferences dentro del método.
+  // - Limpieza de espacios (trim) y manejo de posibles valores vacíos.
+  // - División por cualquier cantidad de espacios usando RegExp.
+  // - Fallback seguro a "Usuario" si no hay datos.
+  Future<String> getUserShortName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final nombresRaw = (prefs.getString(_userFirstNameKey) ?? '').trim();
+    final apellidosRaw = (prefs.getString(_userLastNameKey) ?? '').trim();
+
+    // Obtiene el primer token (palabra) de nombres y apellidos si existen.
+    String firstNombre = '';
+    if (nombresRaw.isNotEmpty) {
+      final partesNombre = nombresRaw.split(RegExp(r'\s+'));
+      if (partesNombre.isNotEmpty) firstNombre = partesNombre.first;
+    }
+
+    String firstApellido = '';
+    if (apellidosRaw.isNotEmpty) {
+      final partesApellido = apellidosRaw.split(RegExp(r'\s+'));
+      if (partesApellido.isNotEmpty) firstApellido = partesApellido.first;
+    }
+
+    final resultado = ('$firstNombre $firstApellido').trim();
+    return resultado.isEmpty ? 'Usuario' : resultado;
   }
 }

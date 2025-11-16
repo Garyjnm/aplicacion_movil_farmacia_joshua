@@ -50,18 +50,28 @@ class SidebarWidget extends StatelessWidget {
           DrawerHeader(
             margin: EdgeInsets.zero,
             decoration: BoxDecoration(color: colors.primaryContainer),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CircleAvatar(
-                  //avatar de prueba
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/images/gary.jpg'),
-                ),
-                const SizedBox(height: 10),
-                Text('Rene Alexander', style: fonts.bodyLarge),
-                Text('renealexander@gmail.com', style: fonts.bodyMedium),
-              ],
+            child: FutureBuilder<String>(
+              future: AuthRepository().getUserShortName(),
+              builder: (context, userSnap) {
+                final fullName = userSnap.data ?? 'Usuario';
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircleAvatar(
+                      radius: 34,
+                      backgroundImage: AssetImage('assets/images/gary.jpg'),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      fullName,
+                      style: fonts.bodyLarge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           //Elementos del sidebar
