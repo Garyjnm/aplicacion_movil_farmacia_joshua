@@ -75,13 +75,7 @@ class AuthRepository {
     final id = await getRoleId();
     return roleFromId(id);
   }
-
-  // Devuelve "PrimerNombre PrimerApellido" del usuario logueado.
-  // Buenas prácticas aplicadas:
-  // - Acceso único a SharedPreferences dentro del método.
-  // - Limpieza de espacios (trim) y manejo de posibles valores vacíos.
-  // - División por cualquier cantidad de espacios usando RegExp.
-  // - Fallback seguro a "Usuario" si no hay datos.
+  
   Future<String> getUserShortName() async {
     final prefs = await SharedPreferences.getInstance();
     final nombresRaw = (prefs.getString(_userFirstNameKey) ?? '').trim();
