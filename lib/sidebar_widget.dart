@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/ventas_screen.dart';
 import 'data/repositories/auth_repository.dart';
+import 'core/utils/roles.dart';
 
 
 class SidebarWidget extends StatelessWidget {
@@ -38,7 +39,11 @@ class SidebarWidget extends StatelessWidget {
 
     return Drawer(
       backgroundColor: colors.primary,
-      child: ListView(
+      child: FutureBuilder<Role>(
+        future: AuthRepository().getCurrentRole(),
+        builder: (context, snapshot) {
+          final role = snapshot.data ?? Role.unknown;
+          return ListView(
         padding: EdgeInsets.zero,
         children: [
           //Header del side bar
@@ -84,63 +89,64 @@ class SidebarWidget extends StatelessWidget {
               );
             },
           ),
-          //Compras
-          ListTile(leading: Icon(Icons.shopping_cart), title: Text("Compras")),
-          //Inventario
-          ExpansionTile(
-            collapsedBackgroundColor: colors.primary,
-            iconColor: colors
-                .onPrimary, //Color del icono de la derecha cuando esta expandido
-            leading: Icon(Icons.inventory),
-            title: Text("Inventario"),
-            childrenPadding: EdgeInsets.only(left: 10),
-            children: [
-              ListTile(
-                leading: Icon(Icons.shopping_bag),
-                title: Text("Productos"),
-                onTap: () {
-                  Navigator.pop(context); // Cierra el drawer
-                  context.router.replace(const ProductosRoute());
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.category),
-                title: Text("Categorias"),
-                onTap: () {
-                  Navigator.pop(context); // Cierra el drawer
-                  context.router.navigate(const CategoriasRoute());
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.local_shipping),
-                title: Text("Proveedores"),
-              ),
-              ListTile(
-                leading: Icon(Icons.assignment_ind),
-                title: Text("Roles"),
-              ),
-            ],
-          ),
-          //Clientes
+          //Compras (solo admin)
+          if (role.isAdmin)
+            ListTile(leading: Icon(Icons.shopping_cart), title: Text("Compras")),
+          //Inventario (solo admin)
+          if (role.isAdmin)
+            ExpansionTile(
+              collapsedBackgroundColor: colors.primary,
+              iconColor: colors.onPrimary,
+              leading: Icon(Icons.inventory),
+              title: Text("Inventario"),
+              childrenPadding: EdgeInsets.only(left: 10),
+              children: [
+                ListTile(
+                  leading: Icon(Icons.shopping_bag),
+                  title: Text("Productos"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.router.replace(const ProductosRoute());
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.category),
+                  title: Text("Categorias"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.router.navigate(const CategoriasRoute());
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.local_shipping),
+                  title: Text("Proveedores"),
+                ),
+                ListTile(
+                  leading: Icon(Icons.assignment_ind),
+                  title: Text("Roles"),
+                ),
+              ],
+            ),
+          //Clientes (visible para admin y vendedor)
           ListTile(
             leading: Icon(Icons.list), 
             title: Text("Clientes"),
             onTap: () {
-              Navigator.pop(context); // Cierra el Drawer
+              Navigator.pop(context);
               context.router.replace(const ClientesRoute());
             },
           ),
           
-          //Usuarios
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text("Usuarios"),
-            onTap: () {
-              Navigator.pop(context); // Cierra el Drawer
-              // Navegar usando AutoRoute hacia la ruta hija del layout
-              context.router.replace(const UsuariosRoute());
-            },
-          ),
+          //Usuarios solo visible para admin
+          if (role.isAdmin)
+            ListTile(
+              leading: const Icon(Icons.people),
+              title: const Text("Usuarios"),
+              onTap: () {
+                Navigator.pop(context);
+                context.router.replace(const UsuariosRoute());
+              },
+            ),
 
           //Configuracion
           ListTile(leading: Icon(Icons.settings), title: Text("Configuracion")),
@@ -151,6 +157,8 @@ class SidebarWidget extends StatelessWidget {
           ),
           //ListTile(leading: Icon(Icons.logout), title: Text("Cerrar Sesion")),
         ],
+      );
+        },
       ),
     );
   }

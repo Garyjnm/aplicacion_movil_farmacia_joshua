@@ -7,9 +7,14 @@ import 'ui/core/themes/dark_theme.dart';
 // import 'ui/authentication/screens/home_page.dart';
 import 'ui/core/routes/routes.dart';
 import 'ui/core/routes/auth_guard.dart';
+import 'ui/core/routes/admin_guard.dart';
 import 'data/repositories/auth_repository.dart';
 
-final AppRouter appRouter = AppRouter(authGuard: AuthGuard(AuthRepository()));
+final _authRepository = AuthRepository();
+final AppRouter appRouter = AppRouter(
+  authGuard: AuthGuard(_authRepository),
+  adminGuard: AdminGuard(_authRepository),
+);
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
