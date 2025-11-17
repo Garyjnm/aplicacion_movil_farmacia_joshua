@@ -175,34 +175,26 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                     itemBuilder: (context, index) {
                       final categoria = categoriasPagina[index];
                       return CustomCard(
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          title: Text(
-                            categoria.nombre,
-                            style: fonts.bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                        title: categoria.nombre,
+                        subtitle: categoria.descripcion,
+                        actions: [
+                          IconButton(
+                            tooltip: 'Editar',
+                            icon: Icon(
+                              Icons.edit,
+                              color: colors.secondaryContainer,
+                            ),
+                            onPressed: () => _mostrarDialogo(categoria: categoria),
                           ),
-                          subtitle: Text(
-                            categoria.descripcion,
-                            style: fonts.bodyMedium,
+                          IconButton(
+                            tooltip: 'Eliminar',
+                            icon: Icon(
+                              Icons.delete,
+                              color: colors.error,
+                            ),
+                            onPressed: () => _confirmarEliminar(categoria),
                           ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () =>
-                                    _mostrarDialogo(categoria: categoria),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () =>
-                                    _confirmarEliminar(categoria),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       );
                     },
                   ),

@@ -208,32 +208,20 @@ class _ClientesScreenState extends State<ClientesScreen> {
                   itemBuilder: (context, index) {
                     final cliente = clientesPagina[index];
                     return CustomCard(
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        title: Text(
-                          // CORRECCIÓN FINAL: Usa ?? '' para manejar null y mostrar el texto correctamente.
-                          '${cliente.nombre ?? ''} ${cliente.apellido ?? ''}',
-                          style: fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                      title: '${cliente.nombre} ${cliente.apellido}',
+                      subtitle: 'ID: ${cliente.idCliente ?? 'N/A'}',
+                      actions: [
+                        IconButton(
+                          tooltip: 'Editar',
+                          icon: Icon(Icons.edit, color: colors.secondaryContainer),
+                          onPressed: () => _mostrarDialogo(cliente: cliente),
                         ),
-                        subtitle: Text(
-                          // CORRECCIÓN FINAL: Usa ?? 'N/A' para manejar null en el ID.
-                          'ID: ${cliente.idCliente ?? 'N/A'}', 
-                          style: fonts.bodyMedium
+                        IconButton(
+                          tooltip: 'Desactivar',
+                          icon: Icon(Icons.delete, color: colors.error),
+                          onPressed: () => _confirmarEliminar(cliente),
                         ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _mostrarDialogo(cliente: cliente),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: colors.error),
-                              onPressed: () => _confirmarEliminar(cliente),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     );
                   },
                 );
