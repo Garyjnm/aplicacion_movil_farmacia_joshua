@@ -7,11 +7,10 @@ import '../../../data/services/venta_service.dart';
 import '../../../data/services/cliente_service.dart';
 import '../../../data/services/producto_service.dart';
 import '../../core/widgets/custom_textfield.dart';
-import '../../core/widgets/custom_dialog.dart'; 
-
+import '../../core/widgets/custom_dialog.dart';
 
 class VentaFormScreen extends StatefulWidget {
-  final Venta? venta; 
+  final Venta? venta;
 
   const VentaFormScreen({Key? key, this.venta}) : super(key: key);
 
@@ -21,8 +20,7 @@ class VentaFormScreen extends StatefulWidget {
 
 class _VentaFormScreenState extends State<VentaFormScreen>
     with SingleTickerProviderStateMixin {
-  
-  // Servicios 
+  // Servicios
   final ClientesService _clienteService = ClientesService();
   final ProductoService _productoService = ProductoService();
   final VentaService _ventaService = VentaService();
@@ -44,7 +42,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
 
   // Selectores temporales (para el control de agregar)
   ProductoModel? _productoParaAgregar;
-  final TextEditingController _cantidadParaAgregarCtrl = TextEditingController(text: '1');
+  final TextEditingController _cantidadParaAgregarCtrl =
+      TextEditingController(text: '1');
 
   bool get isEdit => widget.venta != null;
 
@@ -60,22 +59,22 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     try {
       final clientes = await _clienteService.getClientes();
       final productos = await _productoService.getProductos();
-      
-      _clienteSeleccionado = clientes.firstOrNull; 
+
+      _clienteSeleccionado = clientes.firstOrNull;
 
       if (isEdit) {
         final v = widget.venta!;
 
-        final clienteEncontrado = clientes
-            .where((c) => c.idCliente == v.idCliente)
-            .firstOrNull;
-            
+        final clienteEncontrado =
+            clientes.where((c) => c.idCliente == v.idCliente).firstOrNull;
+
         if (clienteEncontrado != null) {
-            _clienteSeleccionado = clienteEncontrado;
-        } 
-        
+          _clienteSeleccionado = clienteEncontrado;
+        }
+
         _usuarioController.text = v.idUsuario.toString();
-        _fechaController.text = v.fechaVenta.toIso8601String().substring(0, 10);
+        _fechaController.text =
+            v.fechaVenta.toIso8601String().substring(0, 10);
 
         for (var det in v.ventaDetalle) {
           final prod = productos.firstWhere(
@@ -92,7 +91,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
           );
         }
       } else {
-        _fechaController.text = DateTime.now().toIso8601String().substring(0, 10);
+        _fechaController.text =
+            DateTime.now().toIso8601String().substring(0, 10);
       }
 
       setState(() {
@@ -102,7 +102,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error cargando datos: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error cargando datos: $e')));
       Navigator.of(context).pop();
     }
   }
@@ -118,38 +119,47 @@ class _VentaFormScreenState extends State<VentaFormScreen>
 
   void _agregarProductoALista() {
     if (_productoParaAgregar == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seleccione un producto para agregar')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Seleccione un producto para agregar')));
       return;
     }
 
     final cantidad = int.tryParse(_cantidadParaAgregarCtrl.text) ?? 0;
     if (cantidad <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('La cantidad debe ser un número entero positivo')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('La cantidad debe ser un número entero positivo')));
       return;
     }
 
     setState(() {
-      final existenteIndex = _productosSeleccionados.indexWhere((e) => e.producto.almcId == _productoParaAgregar!.almcId);
+      final existenteIndex = _productosSeleccionados
+          .indexWhere((e) => e.producto.almcId == _productoParaAgregar!.almcId);
       if (existenteIndex >= 0) {
         _productosSeleccionados[existenteIndex] =
-            _productosSeleccionados[existenteIndex].copyWith(cantidad: _productosSeleccionados[existenteIndex].cantidad + cantidad);
+            _productosSeleccionados[existenteIndex].copyWith(
+                cantidad:
+                    _productosSeleccionados[existenteIndex].cantidad + cantidad);
       } else {
-        _productosSeleccionados.add(_ProductoSeleccionado(producto: _productoParaAgregar!, cantidad: cantidad));
+        _productosSeleccionados.add(_ProductoSeleccionado(
+            producto: _productoParaAgregar!, cantidad: cantidad));
       }
 
       _productoParaAgregar = null;
       _cantidadParaAgregarCtrl.text = '1';
     });
   }
-  
+
   void _confirmarEliminarProducto(int index) {
-    final nombreProducto = _productosSeleccionados[index].producto.nombreProducto ?? 'este producto';
-    
+    final nombreProducto =
+        _productosSeleccionados[index].producto.nombreProducto ??
+            'este producto';
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmar Eliminación'),
-        content: Text('¿Seguro que deseas eliminar "$nombreProducto" de la lista de venta?'),
+        content: Text(
+            '¿Seguro que deseas eliminar "$nombreProducto" de la lista de venta?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -163,7 +173,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
               });
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar', style: TextStyle(color: Colors.white)),
+            child: const Text('Eliminar',
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -185,9 +196,9 @@ class _VentaFormScreenState extends State<VentaFormScreen>
       onSave: () async {
         final nueva = int.tryParse(controller.text) ?? 0;
         if (nueva <= 0) {
-          throw 'La cantidad debe ser un número entero positivo.'; 
+          throw 'La cantidad debe ser un número entero positivo.';
         }
-        
+
         setState(() {
           _productosSeleccionados[index] = item.copyWith(cantidad: nueva);
         });
@@ -196,6 +207,88 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     );
   }
 
+  // Confirmación tipo “recibo” 
+  String _two(int n) => n.toString().padLeft(2, '0');
+
+  String _formatFechaHora(DateTime dt) {
+    return '${dt.year}-${_two(dt.month)}-${_two(dt.day)} ${_two(dt.hour)}:${_two(dt.minute)}:${_two(dt.second)}';
+  }
+
+  Future<bool?> _mostrarConfirmacionVenta() async {
+    final fechaSolo =
+        DateTime.tryParse(_fechaController.text) ?? DateTime.now();
+    final ahora = DateTime.now();
+    final fechaHora = DateTime(fechaSolo.year, fechaSolo.month, fechaSolo.day,
+        ahora.hour, ahora.minute, ahora.second);
+    final total = _calcularTotal();
+
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        final colors = Theme.of(ctx).colorScheme;
+        final text = Theme.of(ctx).textTheme;
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                16, 16, 16, 24 + MediaQuery.of(ctx).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 48,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Icon(Icons.check_circle, size: 56, color: colors.primaryContainer),
+                const SizedBox(height: 8),
+                Text(
+                  isEdit ? 'Confirmar cambios' : 'Confirmar Venta',
+                  style:
+                      text.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Fecha y hora', style: text.bodyMedium),
+                    Text(_formatFechaHora(fechaHora),
+                        style: text.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Importe a pagar', style: text.bodyMedium),
+                    Text('\$${total.toStringAsFixed(2)}',
+                        style: text.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: const Text('Confirmar venta'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _performSave() async {
     if (_clienteSeleccionado == null) {
@@ -204,14 +297,16 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     if (_productosSeleccionados.isEmpty) {
       throw 'ERROR: Debe agregar al menos un producto para la venta.';
     }
-    if (!isEdit && (int.tryParse(_usuarioController.text) == null || int.tryParse(_usuarioController.text)! <= 0)) {
+    if (!isEdit &&
+        (int.tryParse(_usuarioController.text) == null ||
+            int.tryParse(_usuarioController.text)! <= 0)) {
       throw 'ERROR: El campo ID Usuario debe ser un número entero positivo.';
     }
     final List<DetalleVenta> detalles = [];
     for (var p in _productosSeleccionados) {
       final precio = p.producto.almcPrecioVenta ?? 0.0;
       detalles.add(DetalleVenta(
-        idDetalleVenta: 0, 
+        idDetalleVenta: 0,
         idVenta: isEdit ? widget.venta!.idVenta : 0,
         idProducto: p.producto.almcId ?? 0,
         cantidad: p.cantidad,
@@ -221,24 +316,27 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     }
 
     final venta = Venta(
-        idVenta: isEdit ? widget.venta!.idVenta : 0,
-        idCliente: _clienteSeleccionado!.idCliente!,
-        idUsuario: isEdit ? widget.venta!.idUsuario : int.parse(_usuarioController.text),
-        fechaVenta: DateTime.parse(_fechaController.text),
-        total: _calcularTotal(),
-        ventaDetalle: detalles,
-      );
+      idVenta: isEdit ? widget.venta!.idVenta : 0,
+      idCliente: _clienteSeleccionado!.idCliente!,
+      idUsuario:
+          isEdit ? widget.venta!.idUsuario : int.parse(_usuarioController.text),
+      fechaVenta: DateTime.parse(_fechaController.text),
+      total: _calcularTotal(),
+      ventaDetalle: detalles,
+    );
 
     if (isEdit) {
       await _ventaService.updateVenta(venta);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Venta actualizada correctamente')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Venta actualizada correctamente')));
     } else {
       await _ventaService.createVenta(venta);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Venta creada correctamente')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Venta creada correctamente')));
     }
 
     Navigator.of(context).pop(true);
-    return; 
+    return;
   }
 
   Future<void> _guardarVenta() async {
@@ -247,22 +345,18 @@ class _VentaFormScreenState extends State<VentaFormScreen>
         throw 'Debe completar los campos obligatorios (*).';
       }
 
-      showCustomDialog(
-        context: context,
-        title: isEdit ? 'Confirmar Actualización' : 'Confirmar Venta',
-        content: Text(isEdit
-            ? '¿Deseas guardar los cambios en esta venta?'
-            : 'Estás a punto de registrar una nueva venta por \$${_calcularTotal().toStringAsFixed(2)}. ¿Confirmas?'),
-        onSave: _performSave, 
-        saveLabel: isEdit ? 'Actualizar' : 'Sí, Guardar',
-      );
+      final ok = await _mostrarConfirmacionVenta();
+      if (ok == true) {
+        await _performSave();
+      }
     } on String catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error inesperado: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error inesperado: $e')));
     }
   }
-
 
   @override
   void dispose() {
@@ -304,7 +398,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                       child: Text('${c.nombre} ${c.apellido}'),
                     );
                   }).toList(),
-                  onChanged: isEdit ? null : (v) => setState(() => _clienteSeleccionado = v),
+                  onChanged:
+                      isEdit ? null : (v) => setState(() => _clienteSeleccionado = v),
                   decoration: const InputDecoration(labelText: 'Cliente *'),
                 ),
                 const SizedBox(height: 12),
@@ -317,7 +412,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                 const SizedBox(height: 12),
                 GestureDetector(
                   onTap: () async {
-                    final current = DateTime.tryParse(_fechaController.text) ?? DateTime.now();
+                    final current =
+                        DateTime.tryParse(_fechaController.text) ?? DateTime.now();
                     final pick = await showDatePicker(
                       context: context,
                       initialDate: current,
@@ -326,7 +422,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                     );
                     if (pick != null) {
                       setState(() {
-                        _fechaController.text = pick.toIso8601String().substring(0, 10);
+                        _fechaController.text =
+                            pick.toIso8601String().substring(0, 10);
                       });
                     }
                   },
@@ -341,13 +438,17 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                 Row(
                   children: [
                     Expanded(
-                      child: Text('Total: \$${_calcularTotal().toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      child: Text(
+                        'Total: \$${_calcularTotal().toStringAsFixed(2)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     ElevatedButton.icon(
-                      onPressed: _guardarVenta, 
+                      onPressed: _guardarVenta,
                       icon: const Icon(Icons.save),
-                      label: Text(isEdit ? 'Actualizar' : 'Guardar Venta'),
+                      label:
+                          Text(isEdit ? 'Actualizar' : 'Guardar Venta'),
                     )
                   ],
                 ),
@@ -355,12 +456,14 @@ class _VentaFormScreenState extends State<VentaFormScreen>
             ),
           ),
 
+          // Tab Productos
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Agregar producto', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Agregar producto',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<ProductoModel>(
                   value: _productoParaAgregar,
@@ -373,7 +476,9 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                     );
                   }).toList(),
                   onChanged: (v) => setState(() => _productoParaAgregar = v),
-                  decoration: const InputDecoration(labelText: 'Producto *'),
+                  decoration: const InputDecoration(
+                    hintText: 'Producto',
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -381,7 +486,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                     Expanded(
                       child: CustomTextField(
                         controller: _cantidadParaAgregarCtrl,
-                        label: 'Cantidad *',
+                        label: 'Cantidad',
                         keyboardType: TextInputType.number,
                       ),
                     ),
@@ -397,11 +502,15 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 8),
-                Text('Productos agregados (${_productosSeleccionados.length}) *', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Productos agregados (${_productosSeleccionados.length}) *',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
 
                 if (_productosSeleccionados.isEmpty)
-                  const Text('No hay productos agregados. Debe agregar al menos uno para guardar la venta.'),
+                  const Text(
+                      'No hay productos agregados. Debe agregar al menos uno para guardar la venta.'),
                 ..._productosSeleccionados.asMap().entries.map((entry) {
                   final index = entry.key;
                   final item = entry.value;
@@ -409,14 +518,16 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
-                      title: Text(item.producto.nombreProducto ?? 'Sin nombre'),
-                      subtitle: Text('Cantidad: ${item.cantidad}  •  Precio: \$${precio.toStringAsFixed(2)}  •  Subtotal: \$${(precio * item.cantidad).toStringAsFixed(2)}'),
+                      title:
+                          Text(item.producto.nombreProducto ?? 'Sin nombre'),
+                      subtitle: Text(
+                          'Cantidad: ${item.cantidad}  •  Precio: \$${precio.toStringAsFixed(2)}  •  Subtotal: \$${(precio * item.cantidad).toStringAsFixed(2)}'),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit),
-                            onPressed: () => _editarCantidadIndex(index), 
+                            onPressed: () => _editarCantidadIndex(index),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),

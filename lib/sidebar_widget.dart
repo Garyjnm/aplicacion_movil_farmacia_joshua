@@ -10,17 +10,17 @@ class SidebarWidget extends StatelessWidget {
   const SidebarWidget({super.key});
 
   void _logout(BuildContext context) async {
-    if (context.mounted && Navigator.canPop(context)) {//Se cierra el sidebar junto a la session si no da error
+    if (context.mounted && Navigator.canPop(context)) {
       Navigator.pop(context);
     }
 
     try{
-      final authRepository = AuthRepository();//Se crea una instancia del repositorio
-      await authRepository.logout();//Se llama a la funcion logout del repositorio
+      final authRepository = AuthRepository();
+      await authRepository.logout();
 
-      if (!context.mounted) return;//Verifica que el contexto siga siendo valido
+      if (!context.mounted) return;
 
-      context.router.replace(const LoginRoute());//Navega a la pantalla de login y reemplaza la pila de navegacion
+      context.router.replace(const LoginRoute());
       
     }catch(e){
       if (!context.mounted) return;
@@ -80,8 +80,7 @@ class SidebarWidget extends StatelessWidget {
             leading: const Icon(Icons.home),
             title: const Text("Home"),
             onTap: () {
-              Navigator.pop(context); // Cierra el Drawer
-              // Navega al Home dentro del layout usando AutoRoute
+              Navigator.pop(context); 
               context.router.replace(const HomeRoute());
             },
           ),
@@ -90,7 +89,7 @@ class SidebarWidget extends StatelessWidget {
             leading: Icon(Icons.receipt_long),
             title: Text("Ventas"),
             onTap: () {
-              Navigator.pop(context); // Cierra el drawer
+              Navigator.pop(context); 
               Navigator.push(
                 context,
                 MaterialPageRoute(

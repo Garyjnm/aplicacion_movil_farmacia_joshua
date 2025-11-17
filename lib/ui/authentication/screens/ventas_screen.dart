@@ -84,19 +84,6 @@ class _VentasScreenState extends State<VentasScreen> {
         ),
         iconTheme: IconThemeData(color: colors.onPrimaryContainer),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const VentaFormScreen(),
-            ),
-          );
-          if (result == true) _refresh();
-        },
-        label: const Text("Nueva Venta"),
-        icon: const Icon(Icons.add),
-      ),
       body: FutureBuilder(
         future: _loadFuture,
         builder: (context, snapshot) {
@@ -113,6 +100,29 @@ class _VentasScreenState extends State<VentasScreen> {
 
           return Column(
             children: [
+              // Botón "Nueva Venta" arriba de la lista
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const VentaFormScreen(),
+                          ),
+                        );
+                        if (result == true) _refresh();
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("Nueva Venta"),
+                    ),
+                  ],
+                ),
+              ),
+
               Expanded(
                 child: ventasPagina.isEmpty
                     ? const Center(
@@ -126,10 +136,11 @@ class _VentasScreenState extends State<VentasScreen> {
                           final cliente = _clientes.firstWhere(
                             (c) => c.idCliente == venta.idCliente,
                             orElse: () => ClienteModel(
-                                nombre: 'Desconocido', apellido: ''),
+                              nombre: 'Desconocido',
+                              apellido: '',
+                            ),
                           );
 
-                          
                           String productosInfo = "Sin productos";
                           if (venta.ventaDetalle.isNotEmpty) {
                             final primer = venta.ventaDetalle.first;
@@ -166,40 +177,55 @@ class _VentasScreenState extends State<VentasScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon:
-                                        Icon(Icons.edit, color: colors.secondary),
+                                    icon: Icon(Icons.edit, color: colors.secondary),
                                     onPressed: () async {
                                       final result = await Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) =>
-                                              VentaFormScreen(venta: venta),
+                                          builder: (_) => VentaFormScreen(venta: venta),
                                         ),
                                       );
                                       if (result == true) _refresh();
                                     },
                                   ),
                                   IconButton(
-                                    icon: Icon(
-                                      Icons.delete,
-                                      color: colors.error,
-                                    ),
+                                    icon: Icon(Icons.delete, color: colors.error),
                                     onPressed: () async {
+                                      final confirmar = await showDialog<bool>(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              title: const Text('Confirmar eliminación'),
+                                              content: Text(
+                                                '¿Seguro que deseas eliminar la venta #${venta.idVenta}? Esta acción no se puede deshacer.',
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(ctx).pop(false),
+                                                  child: const Text('Cancelar'),
+                                                ),
+                                                ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: colors.error,
+                                                  ),
+                                                  onPressed: () => Navigator.of(ctx).pop(true),
+                                                  child: const Text('Eliminar'),
+                                                ),
+                                              ],
+                                            ),
+                                          ) ??
+                                          false;
+
+                                      if (!confirmar) return;
+
                                       try {
-                                        await _ventaService.deleteVenta(
-                                            venta.idVenta);
+                                        await _ventaService.deleteVenta(venta.idVenta);
                                         _refresh();
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text("Venta eliminada."),
-                                          ),
+                                          const SnackBar(content: Text("Venta eliminada.")),
                                         );
                                       } catch (e) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content:
-                                                Text("Error al eliminar: $e"),
-                                          ),
+                                          SnackBar(content: Text("Error al eliminar: $e")),
                                         );
                                       }
                                     },
@@ -221,14 +247,19 @@ class _VentasScreenState extends State<VentasScreen> {
                       ),
               ),
 
+              // Paginación un poco más arriba del borde inferior
               if (totalPages > 1)
-                PaginacionControls(
-                  currentPage: currentPage,
-                  totalPages: totalPages,
-                  onPageChanged: (page) {
-                    setState(() => currentPage = page);
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: PaginacionControls(
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    onPageChanged: (page) {
+                      setState(() => currentPage = page);
+                    },
+                  ),
                 ),
+              const SizedBox(height: 8),
             ],
           );
         },
