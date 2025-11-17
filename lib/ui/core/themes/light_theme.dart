@@ -67,7 +67,7 @@ final ThemeData lightTheme = ThemeData(
   ),
   cardTheme: CardThemeData(
       color: _lightColorScheme.surface,  // fondo por default de los Card
-      elevation: 4,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

@@ -224,47 +224,25 @@ class _ProductosScreenState extends State<ProductosScreen> {
                   itemBuilder: (context, index) {
                     final producto = productosPagina[index];
                     return CustomCard(
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        title: Text(
-                          // Muestra el nombre del producto (ajustado para renderizar)
-                          producto.nombreProducto ?? 'Producto sin nombre',
-                          style: fonts.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      title: producto.nombreProducto ?? 'Producto sin nombre',
+                      subtitle: 'Existencia: ${producto.almcExistencia ?? 0} | Precio Venta: \$${(producto.almcPrecioVenta ?? 0.0).toStringAsFixed(2)}',
+                      bodyLines: [
+                        'Vencimiento: ${producto.detalleFechaVencimiento != null ? 
+                          '${producto.detalleFechaVencimiento!.day.toString().padLeft(2, '0')}/${producto.detalleFechaVencimiento!.month.toString().padLeft(2, '0')}/${producto.detalleFechaVencimiento!.year.toString()}' : 'N/A'}',
+                        'ID Inventario: ${producto.almcId ?? 'N/A'} | Lote: ${producto.almcLote ?? 'N/A'}',
+                      ],
+                      actions: [
+                        IconButton(
+                          tooltip: 'Editar',
+                          icon: Icon(Icons.edit, color: colors.secondaryContainer),
+                          onPressed: () => _mostrarDialogo(producto: producto),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Existencia: ${producto.almcExistencia ?? 0} | Precio Venta: \$${(producto.almcPrecioVenta ?? 0.0).toStringAsFixed(2)}', 
-                              style: fonts.bodyMedium
-                            ),
-                            Text(
-                              'Vencimiento: ${producto.detalleFechaVencimiento != null ? 
-                                '${producto.detalleFechaVencimiento!.day.toString().padLeft(2, '0')}/${producto.detalleFechaVencimiento!.month.toString().padLeft(2, '0')}/${producto.detalleFechaVencimiento!.year.toString()}' 
-                                : 'N/A'}', 
-                              style: fonts.bodySmall?.copyWith(fontStyle: FontStyle.italic)
-                            ),
-                            Text(
-                              'ID Inventario: ${producto.almcId ?? 'N/A'} | Lote: ${producto.almcLote ?? 'N/A'}', 
-                              style: fonts.bodySmall
-                            ),
-                          ],
+                        IconButton(
+                          tooltip: 'Eliminar',
+                          icon: Icon(Icons.delete, color: colors.error),
+                          onPressed: () => _confirmarEliminar(producto),
                         ),
-                        isThreeLine: true,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _mostrarDialogo(producto: producto),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: colors.error),
-                              onPressed: () => _confirmarEliminar(producto),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     );
                   },
                 );

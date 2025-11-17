@@ -201,31 +201,21 @@ final UsuarioService _service = UsuarioService();
                   itemCount: usuariosPagina.length, // Número de elementos a mostrar
                   itemBuilder: (context, index) { // Constructor de cada ítem
                     final usuario = usuariosPagina[index]; // Usuario actual
-                    return CustomCard( // Tarjeta personalizada
-                      child: ListTile( // Ítem de lista
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espaciado interno
-                        title: Text(
-                          "${usuario.nombres} ${usuario.apellidos}", // Nombre completo
-                          style: fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold), // Estilo en negrita
+                    return CustomCard(
+                      title: "${usuario.nombres} ${usuario.apellidos}",
+                      subtitle: "Usuario: ${usuario.nombreUsuario} • Rol: ${usuario.idRol}",
+                      actions: [
+                        IconButton(
+                          tooltip: 'Editar',
+                          icon: Icon(Icons.edit, color: colors.secondaryContainer),
+                          onPressed: () => _mostrarDialogo(usuario: usuario),
                         ),
-                        subtitle: Text(
-                          "Usuario: ${usuario.nombreUsuario} • Rol: ${usuario.idRol}", // Subtítulo con rol
-                          style: fonts.bodyMedium, // Estilo de texto
+                        IconButton(
+                          tooltip: 'Eliminar',
+                          icon: Icon(Icons.delete, color: colors.error),
+                          onPressed: () => _confirmarEliminar(usuario),
                         ),
-                        trailing: Row( // Acciones (editar/eliminar)
-                          mainAxisSize: MainAxisSize.min, // Ocupa solo lo necesario
-                          children: [
-                            IconButton( // Botón de editar
-                              icon: const Icon(Icons.edit), // Icono de lápiz
-                              onPressed: () => _mostrarDialogo(usuario: usuario), // Abre diálogo de edición
-                            ),
-                            IconButton( // Botón de eliminar
-                              icon: Icon(Icons.delete, color: colors.error), // Icono de basurero
-                              onPressed: () => _confirmarEliminar(usuario), // Llama al método eliminar
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     );
                   },
                 ),
