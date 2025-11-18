@@ -21,24 +21,26 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return TextField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      enabled: enabled, 
+      enabled: enabled,
       style: TextStyle(
         color: enabled
-            ? colors.onPrimaryContainer
-            : colors.onSurfaceVariant, 
+            ? colors.onSurface
+            : colors.onSurfaceVariant,
       ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
           color: enabled
-              ? colors.onPrimaryContainer
+              ? colors.onSurface
               : colors.onSurfaceVariant,
         ),
+
         filled: true,
         // Fondo blanco por defecto de forma global (si no se especifica).
         fillColor: fillColor ?? (enabled
@@ -46,7 +48,10 @@ class CustomTextField extends StatelessWidget {
           : colors.surfaceVariant), 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: colors.primary,
+            width: 2,
+          ),
         ),
       ),
     );

@@ -4,7 +4,7 @@ import '../models/usuario.dart';
 class UsuarioService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:50498/api/usuario',
+      baseUrl: 'http://10.0.2.2:50498/api/usuario',
       headers: {'Content-Type': 'application/json'},
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
