@@ -56,8 +56,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
       _filterClientes(); 
       setState(() {});
     }).catchError((error) {
-      
-      print("Error al cargar clientes: $error");
+      debugPrint("Error al cargar clientes: $error");
       setState(() {
         _allClientes = [];
         _filteredClientes = [];
@@ -76,8 +75,8 @@ class _ClientesScreenState extends State<ClientesScreen> {
     } else {
       _filteredClientes = _allClientes
           .where((cliente) =>
-              (cliente.nombre ?? '').toLowerCase().contains(query) ||
-              (cliente.apellido ?? '').toLowerCase().contains(query))
+              cliente.nombre.toLowerCase().contains(query) ||
+              cliente.apellido.toLowerCase().contains(query))
           .toList();
     }
     _currentPage = 1; 
@@ -87,8 +86,8 @@ class _ClientesScreenState extends State<ClientesScreen> {
 
   void _mostrarDialogo({ClienteModel? cliente}) {
     if (cliente != null) {
-      _nombreController.text = cliente.nombre ?? '';
-      _apellidoController.text = cliente.apellido ?? '';
+      _nombreController.text = cliente.nombre;
+      _apellidoController.text = cliente.apellido;
     } else {
       _nombreController.clear();
       _apellidoController.clear();
@@ -130,7 +129,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
       context: context,
       title: "Desactivar Cliente",
       content: Text(
-        "¿Seguro que deseas desactivar a '${cliente.nombre ?? ''} ${cliente.apellido ?? ''}'?",
+        "¿Seguro que deseas desactivar a '${cliente.nombre} ${cliente.apellido}'?",
         style: TextStyle(color: colors.onSurface),
       ),
       onSave: () async {
@@ -177,9 +176,12 @@ class _ClientesScreenState extends State<ClientesScreen> {
           // Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: CustomCreateButton(
-              label: "Agregar Cliente",
-              onPressed: () => _mostrarDialogo(),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: CustomCreateButton(
+                label: "Agregar Cliente",
+                onPressed: () => _mostrarDialogo(),
+              ),
             ),
           ),
           // Lista de clientes
