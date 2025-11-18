@@ -25,6 +25,10 @@ class AppRouter extends RootStackRouter {
               guards: [adminGuard],
             ),
             AutoRoute(
+              page: VentasRoute.page,
+              path: 'ventas',
+            ),
+            AutoRoute(
               page: UsuariosRoute.page,
               path: 'usuarios',
               guards: [adminGuard],

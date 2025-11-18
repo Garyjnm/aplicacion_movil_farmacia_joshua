@@ -1,7 +1,6 @@
 import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'ui/authentication/screens/ventas_screen.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/models/role.dart';
 
@@ -93,12 +92,7 @@ class SidebarWidget extends StatelessWidget {
             title: Text("Ventas"),
             onTap: () {
               Navigator.pop(context); 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const VentasScreen(),
-                ),
-              );
+              context.router.navigate(const VentasRoute());
             },
           ),
           //Compras (solo admin)

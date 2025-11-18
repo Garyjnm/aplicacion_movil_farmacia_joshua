@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import '../../../data/services/venta_service.dart';
 import '../../../data/services/cliente_service.dart';
 import '../../../data/services/producto_service.dart';
@@ -10,6 +11,7 @@ import '../../core/widgets/paginacion_controls.dart';
 import 'venta_form_screen.dart'; 
 import 'detalle_venta_screen.dart';
 
+@RoutePage()
 class VentasScreen extends StatefulWidget {
   const VentasScreen({Key? key}) : super(key: key);
 
@@ -74,17 +76,9 @@ class _VentasScreenState extends State<VentasScreen> {
     final endIndex = (startIndex + itemsPerPage).clamp(0, _allVentas.length);
     final ventasPagina = _allVentas.sublist(startIndex, endIndex);
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      appBar: AppBar(
-        backgroundColor: colors.primaryContainer,
-        title: Text(
-          "Ventas",
-          style: fonts.titleLarge?.copyWith(color: colors.onPrimaryContainer),
-        ),
-        iconTheme: IconThemeData(color: colors.onPrimaryContainer),
-      ),
-      body: FutureBuilder(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: FutureBuilder(
         future: _loadFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting &&
@@ -101,25 +95,23 @@ class _VentasScreenState extends State<VentasScreen> {
           return Column(
             children: [
               // Botón "Nueva Venta" arriba de la lista
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Row(
-                  children: [
-                    const Spacer(),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const VentaFormScreen(),
-                          ),
-                        );
-                        if (result == true) _refresh();
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text("Nueva Venta"),
-                    ),
-                  ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const VentaFormScreen(),
+                        ),
+                      );
+                      if (result == true) _refresh();
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text("Nueva Venta"),
+                  ),
                 ),
               ),
 
