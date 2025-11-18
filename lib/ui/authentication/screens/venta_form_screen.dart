@@ -20,16 +20,13 @@ class VentaFormScreen extends StatefulWidget {
 
 class _VentaFormScreenState extends State<VentaFormScreen>
     with SingleTickerProviderStateMixin {
-  // Servicios
   final ClientesService _clienteService = ClientesService();
   final ProductoService _productoService = ProductoService();
   final VentaService _ventaService = VentaService();
 
-  // Datos cargados
   List<ClienteModel> _clientes = [];
   List<ProductoModel> _productos = [];
 
-  // Formularios / controllers
   ClienteModel? _clienteSeleccionado;
   final TextEditingController _usuarioController = TextEditingController();
   final TextEditingController _fechaController = TextEditingController();
@@ -37,10 +34,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
   bool _cargando = true;
   late TabController _tabController;
 
-  // Productos agregados a la factura
   List<_ProductoSeleccionado> _productosSeleccionados = [];
 
-  // Selectores temporales (para el control de agregar)
   ProductoModel? _productoParaAgregar;
   final TextEditingController _cantidadParaAgregarCtrl =
       TextEditingController(text: '1');
@@ -54,7 +49,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     _loadInitialData();
   }
 
-  // --- MÉTODOS DE CARGA Y CÁLCULO ---
+  
   Future<void> _loadInitialData() async {
     try {
       final clientes = await _clienteService.getClientes();
@@ -207,7 +202,6 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     );
   }
 
-  // Confirmación tipo “recibo” 
   String _two(int n) => n.toString().padLeft(2, '0');
 
   String _formatFechaHora(DateTime dt) {
@@ -375,6 +369,9 @@ class _VentaFormScreenState extends State<VentaFormScreen>
       );
     }
 
+    
+
+
     return Scaffold(
       appBar: AppBar(
        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -382,7 +379,6 @@ class _VentaFormScreenState extends State<VentaFormScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [Tab(text: 'Datos'), Tab(text: 'Productos')],
-          // Colores y estilos con alto contraste
           labelColor: Theme.of(context).colorScheme.onPrimaryContainer,
           unselectedLabelColor: Theme.of(context)
               .colorScheme
