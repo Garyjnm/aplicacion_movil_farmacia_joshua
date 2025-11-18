@@ -1,3 +1,4 @@
+// ...existing code...
 import 'detalle_venta.dart';
 
 class Venta {
@@ -34,4 +35,23 @@ class Venta {
       ventaDetalle: detalleList,
     );
   }
+
+  Map<String, dynamic> toJson({
+    bool includeId = true,
+    bool includeDetalle = true,
+    bool includeIdVentaEnDetalle = true,
+  }) {
+    return {
+      if (includeId) 'idVenta': idVenta,
+      'idCliente': idCliente,
+      'idUsuario': idUsuario,
+      'fechaVenta': fechaVenta.toIso8601String(),
+      'total': total,
+      if (includeDetalle)
+        'ventaDetalle': ventaDetalle
+            .map((d) => d.toJson(includeIdVenta: includeIdVentaEnDetalle))
+            .toList(),
+    };
+  }
 }
+// ...existing code...

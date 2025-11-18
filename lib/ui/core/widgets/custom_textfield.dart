@@ -6,6 +6,8 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final bool enabled;
+  // ✨ AÑADIR LA PROPIEDAD readOnly ✨
+  final bool readOnly; 
 
   const CustomTextField({
     Key? key,
@@ -14,6 +16,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType,
     this.enabled = true,
+    this.readOnly = false, // Establecer valor por defecto
   }) : super(key: key);
 
   @override
@@ -26,8 +29,13 @@ class CustomTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       enabled: enabled,
+      // ✨ PASAR LA PROPIEDAD readOnly AL WIDGET INTERNO ✨
+      readOnly: readOnly, 
+      
+      // La lógica del color es importante si usas 'enabled: false'
+      // Si usas 'readOnly: true' y 'enabled: true', el color debe ser el normal.
       style: TextStyle(
-        color: enabled
+        color: enabled 
             ? colors.onSurface
             : colors.onSurfaceVariant,
       ),
@@ -54,6 +62,13 @@ class CustomTextField extends StatelessWidget {
             color: colors.primary,
             width: 2,
           ),
+        ),
+        // Si el campo no está habilitado, usa un borde distinto
+        disabledBorder: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(12),
+           borderSide: BorderSide(
+             color: colors.outline.withOpacity(0.3),
+           ),
         ),
       ),
     );

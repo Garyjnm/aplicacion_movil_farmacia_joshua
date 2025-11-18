@@ -1,5 +1,6 @@
+// ...existing code...
 class DetalleVenta {
-  final int idDetalleVenta;
+  final int? idDetalleVenta;
   final int idVenta;
   final int idProducto;
   final int cantidad;
@@ -7,7 +8,7 @@ class DetalleVenta {
   final double subtotal;
 
   DetalleVenta({
-    required this.idDetalleVenta,
+    this.idDetalleVenta, // <-- ahora opcional para nuevos
     required this.idVenta,
     required this.idProducto,
     required this.cantidad,
@@ -25,4 +26,21 @@ class DetalleVenta {
       subtotal: (json['subtotal'] as num).toDouble(),
     );
   }
+
+  Map<String, dynamic> toJson({bool includeIdVenta = true}) {
+    final map = <String, dynamic>{
+      'idProducto': idProducto,
+      'cantidad': cantidad,
+      'precioUnitario': precioUnitario,
+      'subtotal': subtotal,
+    };
+    if (idDetalleVenta != null) {
+      map['idDetalleVenta'] = idDetalleVenta;
+    }
+    if (includeIdVenta) {
+      map['idVenta'] = idVenta;
+    }
+    return map;
+  }
 }
+// ...existing code...

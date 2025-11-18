@@ -9,6 +9,31 @@ import '../../../data/services/producto_service.dart';
 import '../../core/widgets/custom_textfield.dart';
 import '../../core/widgets/custom_dialog.dart';
 
+// Auxiliar: item seleccionado en la UI
+class _ProductoSeleccionado {
+  final ProductoModel producto;
+  final int cantidad;
+  final int? idDetalleVenta; // null => nuevo detalle
+
+  _ProductoSeleccionado({
+    required this.producto,
+    required this.cantidad,
+    this.idDetalleVenta,
+  });
+
+  _ProductoSeleccionado copyWith({
+    ProductoModel? producto,
+    int? cantidad,
+    int? idDetalleVenta,
+  }) {
+    return _ProductoSeleccionado(
+      producto: producto ?? this.producto,
+      cantidad: cantidad ?? this.cantidad,
+      idDetalleVenta: idDetalleVenta ?? this.idDetalleVenta,
+    );
+  }
+}
+
 class VentaFormScreen extends StatefulWidget {
   final Venta? venta;
 
@@ -34,8 +59,12 @@ class _VentaFormScreenState extends State<VentaFormScreen>
   bool _cargando = true;
   late TabController _tabController;
 
+  // Productos elegidos en la venta (conserva idDetalleVenta si ya existe)
   List<_ProductoSeleccionado> _productosSeleccionados = [];
+  // Mantener los ids de detalles eliminados cuando estamos editando
+  final List<int> _detallesEliminados = [];
 
+  // Para agregar nuevos productos
   ProductoModel? _productoParaAgregar;
   final TextEditingController _cantidadParaAgregarCtrl =
       TextEditingController(text: '1');
@@ -49,45 +78,53 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     _loadInitialData();
   }
 
-  
   Future<void> _loadInitialData() async {
     try {
       final clientes = await _clienteService.getClientes();
       final productos = await _productoService.getProductos();
 
-      _clienteSeleccionado = clientes.firstOrNull;
+      // Seleccionar primer cliente si existe (solo para nueva venta)
+      _clienteSeleccionado = clientes.isNotEmpty ? clientes.first : null;
 
       if (isEdit) {
         final v = widget.venta!;
 
-        final clienteEncontrado =
-            clientes.where((c) => c.idCliente == v.idCliente).firstOrNull;
-
-        if (clienteEncontrado != null) {
-          _clienteSeleccionado = clienteEncontrado;
+        // Seleccionar el cliente de la venta (si existe en el catálogo)
+        try {
+          _clienteSeleccionado =
+              clientes.firstWhere((c) => c.idCliente == v.idCliente);
+        } catch (_) {
+          // Si no se encuentra, se mantiene el que estaba (o null)
         }
 
         _usuarioController.text = v.idUsuario.toString();
-        _fechaController.text =
-            v.fechaVenta.toIso8601String().substring(0, 10);
+        // Solo fecha YYYY-MM-DD
+        _fechaController.text = v.fechaVenta.toIso8601String().substring(0, 10);
 
+        // Cargar detalles existentes en la lista editable
         for (var det in v.ventaDetalle) {
-          final prod = productos.firstWhere(
-            (p) => p.almcId == det.idProducto,
-            orElse: () => ProductoModel(
-              almcId: det.idProducto,
-              nombreProducto: 'Producto Desconocido',
-              almcPrecioVenta: det.precioUnitario,
-            ),
-          );
+          // Intentar recuperar el producto del catálogo
+          final prod = _buscarProductoPorId(productos, det.idProducto) ??
+              ProductoModel(
+                almcId: det.idProducto,
+                nombreProducto: 'Producto Desconocido',
+                almcPrecioVenta: det.precioUnitario,
+              );
 
           _productosSeleccionados.add(
-            _ProductoSeleccionado(producto: prod, cantidad: det.cantidad),
+            _ProductoSeleccionado(
+              producto: prod,
+              cantidad: det.cantidad,
+              idDetalleVenta: det.idDetalleVenta,
+            ),
           );
         }
       } else {
-        _fechaController.text =
-            DateTime.now().toIso8601String().substring(0, 10);
+        // Nueva venta
+        _fechaController.text = DateTime.now().toIso8601String().substring(0, 10);
+        if (_usuarioController.text.isEmpty) {
+          _usuarioController.text = '1';
+        }
       }
 
       setState(() {
@@ -100,6 +137,14 @@ class _VentaFormScreenState extends State<VentaFormScreen>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error cargando datos: $e')));
       Navigator.of(context).pop();
+    }
+  }
+
+  ProductoModel? _buscarProductoPorId(List<ProductoModel> lista, int id) {
+    try {
+      return lista.firstWhere((p) => (p.almcId ?? 0) == id);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -129,14 +174,21 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     setState(() {
       final existenteIndex = _productosSeleccionados
           .indexWhere((e) => e.producto.almcId == _productoParaAgregar!.almcId);
+
       if (existenteIndex >= 0) {
+        // Si ya existe en la lista, sumamos cantidad, conservando idDetalleVenta
+        final actual = _productosSeleccionados[existenteIndex];
         _productosSeleccionados[existenteIndex] =
-            _productosSeleccionados[existenteIndex].copyWith(
-                cantidad:
-                    _productosSeleccionados[existenteIndex].cantidad + cantidad);
+            actual.copyWith(cantidad: actual.cantidad + cantidad);
       } else {
-        _productosSeleccionados.add(_ProductoSeleccionado(
-            producto: _productoParaAgregar!, cantidad: cantidad));
+        // Nuevo item; idDetalleVenta: null para que el backend lo cree
+        _productosSeleccionados.add(
+          _ProductoSeleccionado(
+            producto: _productoParaAgregar!,
+            cantidad: cantidad,
+            idDetalleVenta: null,
+          ),
+        );
       }
 
       _productoParaAgregar = null;
@@ -145,9 +197,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
   }
 
   void _confirmarEliminarProducto(int index) {
-    final nombreProducto =
-        _productosSeleccionados[index].producto.nombreProducto ??
-            'este producto';
+    final item = _productosSeleccionados[index];
+    final nombreProducto = item.producto.nombreProducto ?? 'este producto';
 
     showDialog(
       context: context,
@@ -164,12 +215,16 @@ class _VentaFormScreenState extends State<VentaFormScreen>
             onPressed: () {
               Navigator.pop(ctx);
               setState(() {
+                // Si estamos editando y el detalle existe en backend, marcar para eliminar
+                if (isEdit && (item.idDetalleVenta ?? 0) > 0) {
+                  _detallesEliminados.add(item.idDetalleVenta!);
+                }
                 _productosSeleccionados.removeAt(index);
               });
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar',
-                style: TextStyle(color: Colors.white)),
+            child:
+                const Text('Eliminar', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -193,7 +248,6 @@ class _VentaFormScreenState extends State<VentaFormScreen>
         if (nueva <= 0) {
           throw 'La cantidad debe ser un número entero positivo.';
         }
-
         setState(() {
           _productosSeleccionados[index] = item.copyWith(cantidad: nueva);
         });
@@ -212,8 +266,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
     final fechaSolo =
         DateTime.tryParse(_fechaController.text) ?? DateTime.now();
     final ahora = DateTime.now();
-    final fechaHora = DateTime(fechaSolo.year, fechaSolo.month, fechaSolo.day,
-        ahora.hour, ahora.minute, ahora.second);
+    final fechaHora = DateTime(
+        fechaSolo.year, fechaSolo.month, fechaSolo.day, ahora.hour, ahora.minute, ahora.second);
     final total = _calcularTotal();
 
     return showModalBottomSheet<bool>(
@@ -245,17 +299,17 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                 const SizedBox(height: 8),
                 Text(
                   isEdit ? 'Confirmar cambios' : 'Confirmar Venta',
-                  style:
-                      text.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                  style: text.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Fecha y hora', style: text.bodyMedium),
-                    Text(_formatFechaHora(fechaHora),
-                        style: text.bodyMedium
-                            ?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      _formatFechaHora(fechaHora),
+                      style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -263,9 +317,10 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Importe a pagar', style: text.bodyMedium),
-                    Text('\$${total.toStringAsFixed(2)}',
-                        style: text.bodyMedium
-                            ?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      '\$${total.toStringAsFixed(2)}',
+                      style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -273,7 +328,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
-                    child: const Text('Confirmar venta'),
+                    child: Text(isEdit ? 'Actualizar venta' : 'Confirmar venta'),
                   ),
                 ),
               ],
@@ -296,56 +351,61 @@ class _VentaFormScreenState extends State<VentaFormScreen>
             int.tryParse(_usuarioController.text)! <= 0)) {
       throw 'ERROR: El campo ID Usuario debe ser un número entero positivo.';
     }
-    final List<DetalleVenta> detalles = [];
-    for (var p in _productosSeleccionados) {
+
+    // Mapear items seleccionados a DetalleVenta, preservando idDetalleVenta si existe.
+    final List<DetalleVenta> detalles = _productosSeleccionados.map((p) {
       final precio = p.producto.almcPrecioVenta ?? 0.0;
-      detalles.add(DetalleVenta(
-        idDetalleVenta: 0,
-        idVenta: isEdit ? widget.venta!.idVenta : 0,
+      return DetalleVenta(
+        idDetalleVenta: p.idDetalleVenta, // null => nuevo
+        idVenta: isEdit ? widget.venta!.idVenta : 0, // backend usualmente ignora en create
         idProducto: p.producto.almcId ?? 0,
         cantidad: p.cantidad,
         precioUnitario: precio,
         subtotal: p.cantidad * precio,
-      ));
-    }
+      );
+    }).toList();
 
     final venta = Venta(
       idVenta: isEdit ? widget.venta!.idVenta : 0,
       idCliente: _clienteSeleccionado!.idCliente!,
-      idUsuario:
-          isEdit ? widget.venta!.idUsuario : int.parse(_usuarioController.text),
+      idUsuario: isEdit
+          ? widget.venta!.idUsuario
+          : int.parse(_usuarioController.text),
       fechaVenta: DateTime.parse(_fechaController.text),
       total: _calcularTotal(),
       ventaDetalle: detalles,
     );
 
     if (isEdit) {
-      await _ventaService.updateVenta(venta);
+      await _ventaService.updateVenta(
+        venta,
+        detallesEliminados: _detallesEliminados,
+      );
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Venta actualizada correctamente')));
+        const SnackBar(content: Text('Venta actualizada correctamente')),
+      );
     } else {
       await _ventaService.createVenta(venta);
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Venta creada correctamente')));
+        const SnackBar(content: Text('Venta creada correctamente')),
+      );
     }
 
+    if (!mounted) return;
     Navigator.of(context).pop(true);
-    return;
   }
 
   Future<void> _guardarVenta() async {
     try {
       if (_clienteSeleccionado == null || _productosSeleccionados.isEmpty) {
-        throw 'Debe completar los campos obligatorios (*).';
+        throw 'Debe seleccionar un cliente y agregar al menos un producto.';
       }
-
       final ok = await _mostrarConfirmacionVenta();
       if (ok == true) {
         await _performSave();
       }
     } on String catch (error) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error inesperado: $e')));
@@ -369,22 +429,18 @@ class _VentaFormScreenState extends State<VentaFormScreen>
       );
     }
 
-    
-
-
     return Scaffold(
       appBar: AppBar(
-       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         title: Text(isEdit ? 'Editar Venta' : 'Nueva Venta'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [Tab(text: 'Datos'), Tab(text: 'Productos')],
           labelColor: Theme.of(context).colorScheme.onPrimaryContainer,
-          unselectedLabelColor: Theme.of(context)
-              .colorScheme
-              .onPrimaryContainer
-                .withOpacity(0.65),
-          labelStyle: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.2),
+          unselectedLabelColor:
+              Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.65),
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.2),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
           indicatorColor: Theme.of(context).colorScheme.secondary,
           indicatorWeight: 3,
@@ -394,6 +450,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
+          // Tab Datos
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -403,20 +460,22 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                   items: _clientes.map((c) {
                     return DropdownMenuItem(
                       value: c,
-                      child: Text('${c.nombre} ${c.apellido}'),
+                      child: Text('${c.nombre ?? ''} ${c.apellido ?? ''}'.trim()),
                     );
                   }).toList(),
-                  onChanged:
-                      isEdit ? null : (v) => setState(() => _clienteSeleccionado = v),
+                  onChanged: isEdit
+                      ? null
+                      : (v) => setState(() => _clienteSeleccionado = v),
                   decoration: const InputDecoration(labelText: 'Cliente *'),
                 ),
                 const SizedBox(height: 12),
-                if (!isEdit)
-                  CustomTextField(
-                    controller: _usuarioController,
-                    label: 'ID Usuario *',
-                    keyboardType: TextInputType.number,
-                  ),
+                // En edición no permitimos modificar el usuario
+                CustomTextField(
+                  controller: _usuarioController,
+                  label: 'ID Usuario *',
+                  keyboardType: TextInputType.number,
+                  readOnly: isEdit,
+                ),
                 const SizedBox(height: 12),
                 GestureDetector(
                   onTap: () async {
@@ -455,8 +514,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                     ElevatedButton.icon(
                       onPressed: _guardarVenta,
                       icon: const Icon(Icons.save),
-                      label:
-                          Text(isEdit ? 'Actualizar' : 'Guardar Venta'),
+                      label: Text(isEdit ? 'Actualizar' : 'Guardar Venta'),
                     )
                   ],
                 ),
@@ -475,7 +533,7 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                 const SizedBox(height: 8),
                 DropdownButtonFormField<ProductoModel>(
                   value: _productoParaAgregar,
-                  isExpanded: true ,
+                  isExpanded: true,
                   menuMaxHeight: 400,
                   items: _productos.map((p) {
                     final precio = p.almcPrecioVenta?.toStringAsFixed(2) ?? '0.00';
@@ -553,23 +611,6 @@ class _VentaFormScreenState extends State<VentaFormScreen>
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ProductoSeleccionado {
-  final ProductoModel producto;
-  final int cantidad;
-
-  _ProductoSeleccionado({
-    required this.producto,
-    required this.cantidad,
-  });
-
-  _ProductoSeleccionado copyWith({ProductoModel? producto, int? cantidad}) {
-    return _ProductoSeleccionado(
-      producto: producto ?? this.producto,
-      cantidad: cantidad ?? this.cantidad,
     );
   }
 }
