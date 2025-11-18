@@ -97,19 +97,36 @@ final UsuarioService _service = UsuarioService();
     showCustomDialog(
       context: context,
       title: usuario == null ? "Agregar Usuario" : "Editar Usuario", // Título dinámico
-      content: Column( // Contenido del diálogo
-        mainAxisSize: MainAxisSize.min, // Ajusta tamaño según contenido
-        children: [
-          CustomTextField(controller: _nombresController, label: "Nombres"), // Campo para nombres
-          const SizedBox(height: 12), // Espacio
-          CustomTextField(controller: _apellidosController, label: "Apellidos"), // Campo apellidos
-          const SizedBox(height: 12),
-          CustomTextField(controller: _nombreUsuarioController, label: "Nombre de Usuario"), // Campo usuario
-          const SizedBox(height: 12),
-          CustomTextField(controller: _contrasenaController, label: "Contraseña", obscureText: true), // Campo contraseña
-          const SizedBox(height: 12),
-          CustomTextField(controller: _idRolController, label: "ID Rol"), // Campo rol
-        ],
+      content: Builder(
+        builder: (ctx) {
+          final screenHeight = MediaQuery.of(ctx).size.height;
+          final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+          final maxHeight = screenHeight * 0.6; // límite para evitar scroll infinito
+          return AnimatedPadding(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomTextField(controller: _nombresController, label: "Nombres"),
+                    const SizedBox(height: 12),
+                    CustomTextField(controller: _apellidosController, label: "Apellidos"),
+                    const SizedBox(height: 12),
+                    CustomTextField(controller: _nombreUsuarioController, label: "Nombre de Usuario"),
+                    const SizedBox(height: 12),
+                    CustomTextField(controller: _contrasenaController, label: "Contraseña", obscureText: true),
+                    const SizedBox(height: 12),
+                    CustomTextField(controller: _idRolController, label: "ID Rol"),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
       // Acción al guardar
       onSave: () async {
