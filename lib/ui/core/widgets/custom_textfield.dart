@@ -6,6 +6,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final bool enabled; 
+  final Color? fillColor; // permite personalizar el fondo
 
   const CustomTextField({
     Key? key,
@@ -14,6 +15,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType,
     this.enabled = true, 
+    this.fillColor,
   }) : super(key: key);
 
   @override
@@ -38,9 +40,10 @@ class CustomTextField extends StatelessWidget {
               : colors.onSurfaceVariant,
         ),
         filled: true,
-        fillColor: enabled
-            ? colors.primaryContainer
-            : colors.surfaceVariant, 
+        // Fondo blanco por defecto de forma global (si no se especifica).
+        fillColor: fillColor ?? (enabled
+          ? Colors.white
+          : colors.surfaceVariant), 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
