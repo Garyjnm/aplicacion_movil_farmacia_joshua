@@ -479,6 +479,8 @@ class _VentaFormScreenState extends State<VentaFormScreen>
                 const SizedBox(height: 8),
                 DropdownButtonFormField<ProductoModel>(
                   value: _productoParaAgregar,
+                  isExpanded: true ,
+                  menuMaxHeight: 400,
                   items: _productos.map((p) {
                     final precio = p.almcPrecioVenta?.toStringAsFixed(2) ?? '0.00';
                     final nombre = p.nombreProducto ?? 'Sin nombre';
