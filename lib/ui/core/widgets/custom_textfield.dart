@@ -39,11 +39,9 @@ class CustomTextField extends StatelessWidget {
               : colors.onSurfaceVariant,
         ),
 
-        // === FONDO IGUAL AL FORMULARIO ===
         filled: true,
         fillColor: isDark ? colors.surfaceVariant : Colors.white,
 
-        // === BORDES IGUALES AL FORMULARIO ===
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
