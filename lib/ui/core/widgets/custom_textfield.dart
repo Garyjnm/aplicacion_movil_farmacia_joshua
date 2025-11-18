@@ -5,7 +5,7 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final bool obscureText;
   final TextInputType? keyboardType;
-  final bool enabled; 
+  final bool enabled;
 
   const CustomTextField({
     Key? key,
@@ -13,37 +13,49 @@ class CustomTextField extends StatelessWidget {
     required this.label,
     this.obscureText = false,
     this.keyboardType,
-    this.enabled = true, 
+    this.enabled = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return TextField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      enabled: enabled, 
+      enabled: enabled,
       style: TextStyle(
         color: enabled
-            ? colors.onPrimaryContainer
-            : colors.onSurfaceVariant, 
+            ? colors.onSurface
+            : colors.onSurfaceVariant,
       ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
           color: enabled
-              ? colors.onPrimaryContainer
+              ? colors.onSurface
               : colors.onSurfaceVariant,
         ),
+
+        // === FONDO IGUAL AL FORMULARIO ===
         filled: true,
-        fillColor: enabled
-            ? colors.primaryContainer
-            : colors.surfaceVariant, 
-        border: OutlineInputBorder(
+        fillColor: isDark ? colors.surfaceVariant : Colors.white,
+
+        // === BORDES IGUALES AL FORMULARIO ===
+        enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: colors.outline.withOpacity(0.5),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: colors.primary,
+            width: 2,
+          ),
         ),
       ),
     );
