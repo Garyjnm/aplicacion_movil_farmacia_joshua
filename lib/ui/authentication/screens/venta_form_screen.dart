@@ -377,10 +377,22 @@ class _VentaFormScreenState extends State<VentaFormScreen>
 
     return Scaffold(
       appBar: AppBar(
+       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         title: Text(isEdit ? 'Editar Venta' : 'Nueva Venta'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [Tab(text: 'Datos'), Tab(text: 'Productos')],
+          // Colores y estilos con alto contraste
+          labelColor: Theme.of(context).colorScheme.onPrimaryContainer,
+          unselectedLabelColor: Theme.of(context)
+              .colorScheme
+              .onPrimaryContainer
+                .withOpacity(0.65),
+          labelStyle: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.2),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+          indicatorColor: Theme.of(context).colorScheme.secondary,
+          indicatorWeight: 3,
+          indicatorSize: TabBarIndicatorSize.label,
         ),
       ),
       body: TabBarView(
