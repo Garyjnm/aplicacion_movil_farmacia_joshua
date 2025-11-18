@@ -4,7 +4,7 @@ import '../models/producto.dart';
 class ProductoService {
   final Dio _dio = Dio();
   // ¡IMPORTANTE! Cambia esta URL a la dirección correcta de tu API
-  final String apiUrl = 'http://localhost:50498/api/ProductoAlmacenado'; 
+  final String apiUrl = 'https://farmaciajoshua-f7bncqe5aaefdsfp.switzerlandnorth-01.azurewebsites.net/api/ProductoAlmacenado'; 
 
   ProductoService();
 

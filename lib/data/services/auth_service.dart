@@ -4,7 +4,7 @@ import '../models/auth_response.dart';
 class AuthService {
   // Use the deployed Azure API as the base URL
   // Note: ensure the trailing '/api' matches your server routing (Keystone: the swagger URL uses '/swagger', API root usually '/api')
-  final String baseUrl = 'http://localhost:50498/api';
+  final String baseUrl = 'https://farmaciajoshua-f7bncqe5aaefdsfp.switzerlandnorth-01.azurewebsites.net/api';
   final Dio _dio = Dio(); // Instancia de Dio para realizar las solicitudes HTTP
 
   AuthService() { // Constructor para inicializar la configuración de Dio

@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
         content: Row(
           children: [
             CircleAvatar(
-              backgroundColor: colorScheme.primary,
+              backgroundColor: Colors.green,
               radius: 16,
               child: const Icon(Icons.check, color: Colors.white, size: 18),
             ),

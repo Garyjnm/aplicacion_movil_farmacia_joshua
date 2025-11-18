@@ -4,7 +4,7 @@ import '../models/cliente.dart';
 class ClientesService {
   final Dio _dio = Dio();
   
-  final String apiUrl = 'http://localhost:50498/api/Clientes';
+  final String apiUrl = 'https://farmaciajoshua-f7bncqe5aaefdsfp.switzerlandnorth-01.azurewebsites.net/api/Clientes';
 
   Future<List<ClienteModel>> getClientes({int estado = 1}) async {
     try {
