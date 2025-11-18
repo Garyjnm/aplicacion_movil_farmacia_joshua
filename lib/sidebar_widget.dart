@@ -65,7 +65,10 @@ class SidebarWidget extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(
                       fullName,
-                      style: fonts.bodyLarge,
+                      style: fonts.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: (fonts.bodyLarge?.fontSize ?? 16) + 2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

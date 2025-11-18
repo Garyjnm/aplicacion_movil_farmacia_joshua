@@ -194,7 +194,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: CustomCreateButton(
-              label: "Agregar Producto (Inventario)",
+              label: "Agregar Producto",
               onPressed: () => _mostrarDialogo(),
               alignment: Alignment.centerLeft,
             ),
