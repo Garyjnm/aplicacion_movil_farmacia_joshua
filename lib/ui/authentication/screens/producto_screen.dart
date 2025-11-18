@@ -252,16 +252,19 @@ class _ProductosScreenState extends State<ProductosScreen> {
           ),
           // Controles de paginación
           if (totalPages > 1)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: PaginacionControls(
-                currentPage: _currentPage,
-                totalPages: totalPages,
-                onPageChanged: (page) {
-                  setState(() {
-                    _currentPage = page;
-                  });
-                },
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: PaginacionControls(
+                  currentPage: _currentPage,
+                  totalPages: totalPages,
+                  onPageChanged: (page) {
+                    setState(() {
+                      _currentPage = page;
+                    });
+                  },
+                ),
               ),
             ),
         ],

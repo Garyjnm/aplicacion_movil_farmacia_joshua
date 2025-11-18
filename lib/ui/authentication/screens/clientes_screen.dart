@@ -230,16 +230,19 @@ class _ClientesScreenState extends State<ClientesScreen> {
           ),
           // Controles de paginación
         if (totalPages > 1)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: PaginacionControls(
-              currentPage: _currentPage,
-              totalPages: totalPages,
-              onPageChanged: (page) {
-                setState(() {
-                  _currentPage = page;
-                });
-              },
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: PaginacionControls(
+                currentPage: _currentPage,
+                totalPages: totalPages,
+                onPageChanged: (page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
+              ),
             ),
           ),
       ],

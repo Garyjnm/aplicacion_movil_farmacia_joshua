@@ -242,16 +242,19 @@ final UsuarioService _service = UsuarioService();
         ),
         // Controles de paginación
         if (totalPages > 1) // Solo si hay más de una página
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8), // Espaciado
-            child: PaginacionControls(
-              currentPage: _currentPage, // Página actual
-              totalPages: totalPages, // Total de páginas
-              onPageChanged: (page) { // Callback al cambiar de página
-                setState(() {
-                  _currentPage = page; // Actualiza la página
-                });
-              },
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8), // Espaciado
+              child: PaginacionControls(
+                currentPage: _currentPage, // Página actual
+                totalPages: totalPages, // Total de páginas
+                onPageChanged: (page) { // Callback al cambiar de página
+                  setState(() {
+                    _currentPage = page; // Actualiza la página
+                  });
+                },
+              ),
             ),
           ),
       ],
