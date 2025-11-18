@@ -176,12 +176,10 @@ class _ClientesScreenState extends State<ClientesScreen> {
           // Botón agregar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Align(
+            child: CustomCreateButton(
+              label: "Agregar Cliente",
+              onPressed: () => _mostrarDialogo(),
               alignment: Alignment.centerLeft,
-              child: CustomCreateButton(
-                label: "Agregar Cliente",
-                onPressed: () => _mostrarDialogo(),
-              ),
             ),
           ),
           // Lista de clientes

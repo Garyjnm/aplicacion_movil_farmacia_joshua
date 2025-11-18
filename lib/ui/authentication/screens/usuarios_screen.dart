@@ -188,9 +188,10 @@ final UsuarioService _service = UsuarioService();
         // Botón para agregar nuevo usuario
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Espaciado
-          child: CustomCreateButton(
+            child: CustomCreateButton(
             label: "Agregar Usuario", // Texto del botón
             onPressed: () => _mostrarDialogo(), // Abre el diálogo
+            alignment: Alignment.centerLeft,
           ),
         ),
         // Lista de usuarios

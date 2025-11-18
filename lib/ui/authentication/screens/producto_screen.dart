@@ -196,6 +196,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
             child: CustomCreateButton(
               label: "Agregar Producto (Inventario)",
               onPressed: () => _mostrarDialogo(),
+              alignment: Alignment.centerLeft,
             ),
           ),
           // Lista de productos

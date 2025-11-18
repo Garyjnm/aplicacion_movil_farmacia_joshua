@@ -156,6 +156,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             child: CustomCreateButton(
               label: "Agregar Categoría",
               onPressed: () => _mostrarDialogo(),
+              alignment: Alignment.centerLeft,
             ),
           ),
           const SizedBox(height: 8),
