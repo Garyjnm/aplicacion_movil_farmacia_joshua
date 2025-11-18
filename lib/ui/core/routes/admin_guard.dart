@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:aplicacion_movil_farmacia_joshua/core/utils/roles.dart';
+import 'package:aplicacion_movil_farmacia_joshua/data/models/role.dart';
 import 'package:aplicacion_movil_farmacia_joshua/data/repositories/auth_repository.dart';
 import 'routes.gr.dart';
 

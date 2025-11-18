@@ -7,6 +7,7 @@ import '../../core/widgets/custom_create_button.dart'; // Botón "Agregar"
 import '../../core/widgets/custom_card.dart'; // Tarjeta personalizada
 import '../../core/widgets/custom_textfield.dart'; // Campo de texto personalizado
 import '../../core/widgets/custom_dialog.dart'; // Diálogo personalizado
+import '../../../data/models/role.dart'; // Para mostrar nombre de rol
 
 // Definimos la clase principal de la pantalla de usuarios
 @RoutePage()
@@ -219,9 +220,10 @@ final UsuarioService _service = UsuarioService();
                   itemCount: usuariosPagina.length, // Número de elementos a mostrar
                   itemBuilder: (context, index) { // Constructor de cada ítem
                     final usuario = usuariosPagina[index]; // Usuario actual
+                    final roleName = roleFromId(usuario.idRol).displayName;
                     return CustomCard(
                       title: "${usuario.nombres} ${usuario.apellidos}",
-                      subtitle: "Usuario: ${usuario.nombreUsuario} • Rol: ${usuario.idRol}",
+                      subtitle: "Usuario: ${usuario.nombreUsuario} • Rol: $roleName",
                       actions: [
                         IconButton(
                           tooltip: 'Editar',

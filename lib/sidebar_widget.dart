@@ -3,7 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'ui/authentication/screens/ventas_screen.dart';
 import 'data/repositories/auth_repository.dart';
-import 'core/utils/roles.dart';
+import 'data/models/role.dart';
 
 
 class SidebarWidget extends StatelessWidget {

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../services/auth_service.dart';
-import 'package:aplicacion_movil_farmacia_joshua/core/utils/roles.dart';
+import 'package:aplicacion_movil_farmacia_joshua/data/models/role.dart';
 
 class AuthRepository {
   final AuthService _authService = AuthService(); //Se realiza una inyeccion del servicio
