@@ -5,7 +5,8 @@ import '../models/categoria.dart';
 /// Se agregan headers de autorización (si existe token) y manejo básico de errores.
 class CategoriaService {
   final Dio _dio = Dio();
-  final String apiUrl = 'https://farmaciajoshua-f7bncqe5aaefdsfp.switzerlandnorth-01.azurewebsites.net/api/categoria';
+  final String apiUrl =
+      'https://farmaciajoshua-f7bncqe5aaefdsfp.westus3-01.azurewebsites.net/api/categoria';
 
   Future<List<Categoria>> getCategorias({int estado = 1}) async {
     try {

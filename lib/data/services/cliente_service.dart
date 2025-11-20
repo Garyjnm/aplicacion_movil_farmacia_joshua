@@ -1,16 +1,17 @@
 import 'package:dio/dio.dart';
-import '../models/cliente.dart'; 
+import '../models/cliente.dart';
 
 class ClientesService {
   final Dio _dio = Dio();
-  
-  final String apiUrl = 'https://farmaciajoshua-f7bncqe5aaefdsfp.switzerlandnorth-01.azurewebsites.net/api/Clientes';
+
+  final String apiUrl =
+      'https://farmaciajoshua-f7bncqe5aaefdsfp.westus3-01.azurewebsites.net/api/Clientes';
 
   Future<List<ClienteModel>> getClientes({int estado = 1}) async {
     try {
       final response = await _dio.get("$apiUrl/estado/$estado");
       print(response.data);
-      
+
       List data = response.data;
       return data.map((json) => ClienteModel.fromJson(json)).toList();
     } on DioException catch (e) {
@@ -21,7 +22,6 @@ class ClientesService {
     }
   }
 
-
   Future<ClienteModel> getClienteById(int id) async {
     try {
       final response = await _dio.get("$apiUrl/$id");
@@ -30,7 +30,6 @@ class ClientesService {
       throw Exception('Fallo al obtener cliente por ID: ${e.message}');
     }
   }
-
 
   Future<void> addCliente(ClienteModel cliente) async {
     try {
@@ -47,7 +46,6 @@ class ClientesService {
       throw Exception('Fallo al actualizar cliente: ${e.message}');
     }
   }
-
 
   Future<void> deleteCliente(int id, {int estado = 0}) async {
     try {

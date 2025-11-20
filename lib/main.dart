@@ -1,4 +1,5 @@
 // import 'ui/authentication/screens/categorias_screen.dart';
+import 'package:aplicacion_movil_farmacia_joshua/data/services/metric_buffer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ui/core/themes/theme_provider.dart';
@@ -16,7 +17,9 @@ final AppRouter appRouter = AppRouter(
   adminGuard: AdminGuard(_authRepository),
 );
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  MetricBuffer(); // Inicializa el buffer de métricas/logs
   runApp(const ProviderScope(child: MyApp()));
 }
 
