@@ -8,7 +8,8 @@ class MetricUploader {
     ),
   );
 
-  static const String _base = "http://localhost:50498"; // ajusta según tu caso
+  static const String _base =
+      "https://farmaciajoshua-f7bncqe5aaefdsfp.westus3-01.azurewebsites.net"; // ajusta según tu caso
   static const String _url = "$_base/api/metrics/batch";
 
   static Future<void> upload(List<Map<String, dynamic>> items) async {

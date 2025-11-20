@@ -4,7 +4,8 @@ import '../models/usuario.dart';
 class UsuarioService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:50498/api/usuario',
+      baseUrl:
+          'https://farmaciajoshua-f7bncqe5aaefdsfp.westus3-01.azurewebsites.net/api/usuario',
       headers: {'Content-Type': 'application/json'},
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
@@ -66,10 +67,7 @@ class UsuarioService {
   // Actualizar usuario
   Future<void> updateUsuario(int id, Usuario usuario) async {
     try {
-      final response = await _dio.put(
-        '/$id',
-        data: usuario.toJson(),
-      );
+      final response = await _dio.put('/$id', data: usuario.toJson());
 
       if (response.statusCode != 200) {
         throw Exception('Error al actualizar usuario: ${response.data}');
@@ -82,7 +80,10 @@ class UsuarioService {
   // Eliminar usuario (o cambiar estado)
   Future<void> deleteUsuario(int id, int estado) async {
     try {
-      final response = await _dio.delete('/$id', queryParameters: {'estado': estado});
+      final response = await _dio.delete(
+        '/$id',
+        queryParameters: {'estado': estado},
+      );
 
       if (response.statusCode != 200) {
         throw Exception('Error al eliminar usuario: ${response.data}');

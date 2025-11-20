@@ -1,23 +1,26 @@
 import 'package:dio/dio.dart';
-import '../models/producto.dart'; 
+import '../models/producto.dart';
 
 class ProductoService {
   final Dio _dio = Dio();
   // ¡IMPORTANTE! Cambia esta URL a la dirección correcta de tu API
-  final String apiUrl = 'http://localhost:50498/api/ProductoAlmacenado'; 
+  final String apiUrl =
+      'https://farmaciajoshua-f7bncqe5aaefdsfp.westus3-01.azurewebsites.net/api/ProductoAlmacenado';
 
   ProductoService();
 
   // GET: Obtener todos los productos
   Future<List<ProductoModel>> getProductos() async {
     try {
-      final response = await _dio.get(apiUrl); 
-      
+      final response = await _dio.get(apiUrl);
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         return data.map((json) => ProductoModel.fromJson(json)).toList();
       } else {
-        throw Exception('Fallo al cargar productos. Código: ${response.statusCode}');
+        throw Exception(
+          'Fallo al cargar productos. Código: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       throw Exception('Error de conexión o API: ${e.message}');
@@ -29,9 +32,11 @@ class ProductoService {
     try {
       final response = await _dio.post(apiUrl, data: producto.toJson());
       if (response.statusCode == 200) {
-        return ProductoModel.fromJson(response.data); 
+        return ProductoModel.fromJson(response.data);
       } else {
-        throw Exception('Fallo al agregar producto. Código: ${response.statusCode}');
+        throw Exception(
+          'Fallo al agregar producto. Código: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       throw Exception('Error al agregar: ${e.message}');
