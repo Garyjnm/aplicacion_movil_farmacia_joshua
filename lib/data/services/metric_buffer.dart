@@ -10,12 +10,17 @@ class MetricBuffer {
   }
 
   final List<Map<String, dynamic>> _buffer = [];
-  final int _maxBufferSize = 15;       // cuando lleguen a 15 logs/metrics, se envía
-  final int _flushIntervalSeconds = 10; // cada 10 segundos se intenta enviar
+  final int _maxBufferSize = 15;
+  final int _flushIntervalSeconds = 10;
 
   Timer? _timer;
 
   void addMetric(Map<String, dynamic> data) {
+    // Nunca enviar Id desde el cliente
+    data.remove('Id');
+    data.remove('_id');
+    data['type'] ??= 'metric';
+
     _buffer.add(data);
 
     if (_buffer.length >= _maxBufferSize) {
@@ -34,13 +39,12 @@ class MetricBuffer {
   Future<void> flush() async {
     if (_buffer.isEmpty) return;
 
-    final List<Map<String, dynamic>> itemsToSend = List.from(_buffer);
+    final itemsToSend = List<Map<String, dynamic>>.from(_buffer);
     _buffer.clear();
 
     try {
       await MetricUploader.upload(itemsToSend);
-    } catch (e) {
-      // Si falla, regresamos los datos al buffer para reintento
+    } catch (_) {
       _buffer.insertAll(0, itemsToSend);
     }
   }

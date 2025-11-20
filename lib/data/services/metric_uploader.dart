@@ -3,13 +3,13 @@ import 'package:dio/dio.dart';
 class MetricUploader {
   static final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: const Duration(seconds: 3),
-      receiveTimeout: const Duration(seconds: 3),
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
     ),
   );
 
-  // Cambia esta URL si usas dispositivo REAL
-  static const String _url = "http://localhost:50498/api/metrics/batch";
+  static const String _base = "http://localhost:50498"; // ajusta según tu caso
+  static const String _url = "$_base/api/metrics/batch";
 
   static Future<void> upload(List<Map<String, dynamic>> items) async {
     if (items.isEmpty) return;
@@ -17,13 +17,10 @@ class MetricUploader {
     try {
       await _dio.post(
         _url,
-        data: items, // enviamos array de logs/metricas
-        options: Options(
-          headers: {"Content-Type": "application/json"},
-        ),
+        data: items, // array de métricas
+        options: Options(headers: {"Content-Type": "application/json"}),
       );
     } catch (e) {
-      // el buffer manejará el reintento
       throw Exception("Error subiendo métricas/logs: $e");
     }
   }

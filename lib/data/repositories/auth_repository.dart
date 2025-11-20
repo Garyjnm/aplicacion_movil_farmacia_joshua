@@ -6,7 +6,7 @@ import '../services/auth_service.dart';
 import 'package:aplicacion_movil_farmacia_joshua/core/utils/roles.dart';
 
 class AuthRepository {
-  final AuthService _authService = AuthService(); //Se realiza una inyeccion del servicio
+  final AuthService _authService = AuthService();
 
   static const String _authTokenKey = 'auth_token';
   static const String _roleIdKey = 'role_id';
@@ -19,126 +19,73 @@ class AuthRepository {
     try {
       final authResponse = await _authService.authenticate(username, password);
 
-      // Guardar token, rol y datos básicos del usuario en SharedPreferences
+      // Guardar datos del usuario
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_authTokenKey, authResponse.token);
       await prefs.setInt(_roleIdKey, authResponse.idRol);
       await prefs.setString(_userFirstNameKey, authResponse.nombres);
       await prefs.setString(_userLastNameKey, authResponse.apellidos);
 
-      // Tiempo total
+      // Métrica de éxito
       final int duration = DateTime.now().millisecondsSinceEpoch - start;
-       // Agregar métrica y log al buffer (no bloqueo)
       MetricBuffer().addMetric({
         "name": "login_time_ms",
         "value": duration,
         "tags": {
           "user": username,
-          "endpoint": "/Auth",
-          "result": "success"
+          "result": "success",
         },
-        "timestamp": DateTime.now().toIso8601String(),
-        "type": "metric" // opcional para distinguir payloads en uploader
-      });
-
-      MetricBuffer().addMetric({
-        "level": "info",
-        "controller": "AuthController",
-        "action": "Login",
-        "user": username,
-        "ip": "", // backend llenará ip real; cliente puede dejar vacío o poner device ip
-        "request": {"username": username},
-        "response": {"nombres": authResponse.nombres, "idRol": authResponse.idRol},
-        "durationMs": duration,
-        "timestamp": DateTime.now().toIso8601String(),
-        "type": "log" // marca que es log estructurado
+        "timestamp": DateTime.now().toUtc().toIso8601String(),
+        "type": "metric"
       });
 
       return authResponse;
     } on DioException catch (e) {
       final int duration = DateTime.now().millisecondsSinceEpoch - start;
 
-      // Normalizar mensaje de error (como ya tenías)
-      String errorMessage = 'Fallo en la conexion: ${e.message}';
-      if (e.response?.statusCode == 400) {
-        errorMessage = e.response?.data?['message'] ?? 'Usuario o contraseña incorrectos';
-      } else if (e.type == DioExceptionType.connectionTimeout ||
-                 e.type == DioExceptionType.sendTimeout ||
-                 e.type == DioExceptionType.receiveTimeout) {
-        errorMessage = 'Error de conexión. Por favor, intente nuevamente más tarde.';
-      } else if (e.response?.statusCode != null) {
-        errorMessage = 'Error en la respuesta del servidor: ${e.response?.statusCode}.';
-      }
-
-      // Métrica & log de fallo
-      MetricBuffer().addMetric({
-        "name": "login_time_ms",
-        "value": duration,
-        "tags": {
-          "user": username,
-          "endpoint": "/Auth",
-          "result": "failure"
-        },
-        "timestamp": DateTime.now().toIso8601String(),
-        "type": "metric"
-      });
-
-      MetricBuffer().addMetric({
-        "level": "error",
-        "controller": "AuthController",
-        "action": "Login",
-        "user": username,
-        "ip": "",
-        "request": {"username": username},
-        "response": {"error": errorMessage},
-        "durationMs": duration,
-        "timestamp": DateTime.now().toIso8601String(),
-        "stackTrace": e.stackTrace?.toString(),
-        "type": "log"
-      });
-
-      // relanzar la excepción con el mensaje amigable
-      if (e.response?.statusCode == 400) {
-        final errorMsg = e.response?.data?['message'] ?? 'Usuario o contraseña incorrectos';
-        throw Exception(errorMsg);
-      }
+      String errorMessage = 'Fallo en la conexión: ${e.message}';
+      String resultTag = 'failure';
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        throw Exception('Error de conexión. Por favor, intente nuevamente más tarde.');
+        errorMessage = 'Error de conexión. Intente nuevamente.';
+        resultTag = 'network_error';
+      } else if (e.response?.statusCode == 400) {
+        errorMessage = e.response?.data?['message'] ?? 'Usuario o contraseña incorrectos';
+        resultTag = 'failure';
       } else if (e.response?.statusCode != null) {
-        throw Exception('Error en la respuesta del servidor: ${e.response?.statusCode}. Por favor, intente nuevamente más tarde.');
+        errorMessage = 'Error del servidor: ${e.response?.statusCode}.';
+        resultTag = 'server_error';
       }
 
-      throw Exception('Fallo en la conexion: ${e.message}');
-    } catch (e, st) {
-      final int duration = DateTime.now().millisecondsSinceEpoch - start;
-
+      // Métrica de fallo
       MetricBuffer().addMetric({
         "name": "login_time_ms",
         "value": duration,
         "tags": {
           "user": username,
-          "endpoint": "/Auth",
-          "result": "error"
+          "result": resultTag,
         },
-        "timestamp": DateTime.now().toIso8601String(),
+        "timestamp": DateTime.now().toUtc().toIso8601String(),
         "type": "metric"
       });
 
+      // Propagar un mensaje amigable
+      throw Exception(errorMessage);
+    } catch (e) {
+      final int duration = DateTime.now().millisecondsSinceEpoch - start;
+
+      // Métrica de error inesperado
       MetricBuffer().addMetric({
-        "level": "error",
-        "controller": "AuthController",
-        "action": "Login",
-        "user": username,
-        "ip": "",
-        "request": {"username": username},
-        "response": {"error": e.toString()},
-        "durationMs": duration,
-        "timestamp": DateTime.now().toIso8601String(),
-        "stackTrace": st.toString(),
-        "type": "log"
+        "name": "login_time_ms",
+        "value": duration,
+        "tags": {
+          "user": username,
+          "result": "error",
+        },
+        "timestamp": DateTime.now().toUtc().toIso8601String(),
+        "type": "metric"
       });
 
       throw Exception('Ocurrió un error inesperado durante el login.');
@@ -146,15 +93,11 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    try{
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_authTokenKey);
-      await prefs.remove(_roleIdKey);
-      await prefs.remove(_userFirstNameKey);
-      await prefs.remove(_userLastNameKey);
-    }catch(e){
-      throw Exception('Error al limpiar la session local.');
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_authTokenKey);
+    await prefs.remove(_roleIdKey);
+    await prefs.remove(_userFirstNameKey);
+    await prefs.remove(_userLastNameKey);
   }
 
   Future<String> getAuthToken() async {
@@ -177,20 +120,19 @@ class AuthRepository {
     final nombresRaw = (prefs.getString(_userFirstNameKey) ?? '').trim();
     final apellidosRaw = (prefs.getString(_userLastNameKey) ?? '').trim();
 
-    // Obtiene el primer token (palabra) de nombres y apellidos si existen.
     String firstName = '';
     if (nombresRaw.isNotEmpty) {
-      final name = nombresRaw.split(RegExp(r'\s+'));
-      if (name.isNotEmpty) firstName = name.first;
+      final parts = nombresRaw.split(RegExp(r'\s+'));
+      if (parts.isNotEmpty) firstName = parts.first;
     }
 
     String firstLastName = '';
     if (apellidosRaw.isNotEmpty) {
-      final lastName = apellidosRaw.split(RegExp(r'\s+'));
-      if (lastName.isNotEmpty) firstLastName = lastName.first;
+      final parts = apellidosRaw.split(RegExp(r'\s+'));
+      if (parts.isNotEmpty) firstLastName = parts.first;
     }
 
-    final resultado = ('$firstName $firstLastName').trim();
-    return resultado.isEmpty ? 'Usuario' : resultado;
+    final result = ('$firstName $firstLastName').trim();
+    return result.isEmpty ? 'Usuario' : result;
   }
 }
