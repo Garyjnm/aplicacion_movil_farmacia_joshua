@@ -18,7 +18,7 @@ class AuthResponse { // Modelo para la respuesta de autenticación
     
     factory AuthResponse.fromJson(Map<String, dynamic> json) { // Método factory para crear una instancia desde JSON 
         return AuthResponse(
-            token: json['Token'] ?? '', //Utilizamos el operador logico por si nos llega vacio el campo
+            token: json['token'] ?? '', //Utilizamos el operador logico por si nos llega vacio el campo
             idUsuario: json['idUsuario'] ?? 0, //Utilizamos el operador logico por si nos llega vacio el campo
             nombres: json['nombres'] ?? '',
             apellidos: json['apellidos'] ?? '',

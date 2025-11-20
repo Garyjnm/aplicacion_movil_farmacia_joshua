@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'package:auto_route/auto_route.dart';
-import './home_page.dart';
+import 'package:aplicacion_movil_farmacia_joshua/ui/core/routes/routes.gr.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -18,27 +18,72 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _usernameController = TextEditingController(
     text: '',
-  ); //este controlador nos permite obtener el texto del campo de usuario
+  );
   final TextEditingController _passwordController =
-      TextEditingController(); //este controlador nos permite obtener el texto del campo de contraseña
+      TextEditingController(); 
 
-  bool _isLoading = false; //nuevo estado para controlar la animación del botón
+  // Focus nodes y banderas para controlar cuándo mostrar errores (solo después de que el usuario toque y salga del campo)
+  final FocusNode _usernameFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+
+  bool _usernameTouched = false;
+  bool _passwordTouched = false;
+
+  bool _obscurePassword = true;
+
+  bool _isLoading = false;
+  bool _isFormValid = false; 
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Cuando el foco se pierde marcaremos el campo como "tocado" para mostrar errores
+    _usernameFocus.addListener(() {
+      if (!_usernameFocus.hasFocus) {
+        setState(() {
+          _usernameTouched = true;
+        });
+      }
+    });
+
+    _passwordFocus.addListener(() {
+      if (!_passwordFocus.hasFocus) {
+        setState(() {
+          _passwordTouched = true;
+        });
+      }
+    });
+
+    // Escuchar cambios para actualizar el estado del botón inmediatamente
+    _usernameController.addListener(_updateFormValidity);
+    _passwordController.addListener(_updateFormValidity);
+  }
 
   @override
   void dispose() {
     _usernameController
-        .dispose(); //liberamos los recursos del controlador cuando ya no se necesita
+        .dispose(); 
     _passwordController
-        .dispose(); //liberamos los recursos del controlador cuando ya no se necesita
+        .dispose(); 
+    _usernameFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
+  }
+
+  void _updateFormValidity() {
+    // Ahora solo requerimos que ambos campos no estén vacíos
+    final valid = _usernameController.text.trim().isNotEmpty && _passwordController.text.isNotEmpty;
+    if (valid != _isFormValid) {
+      setState(() => _isFormValid = valid);
+    }
   }
 
   void _login() async {
     final username =
-        _usernameController.text; //obtenemos el texto del campo de usuario
+        _usernameController.text; 
     final password =
-        _passwordController.text; //obtenemos el texto del campo de contraseña
-
+        _passwordController.text; 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -51,60 +96,102 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() {
       _isLoading =
-          true; //iniciamos el estado de carga y deshabilitamos el botón
+          true;
     });
 
     try {
       final authResponse = await _authRepository.login(username, password);
-
-      if (!mounted) {
-        return; //verificamos que el widget aún esté en el árbol de widgets
-      }
-      //-----------Mensaje para cuando el login es correcto-----------
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '✅ Login exitoso. Bienvenido(a) ${authResponse.nombres}!',
-          ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .primaryContainer, //utilizamos un color del tema para que combine con el diseño
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
-      context.router.replacePath(
-        HomePage.routeName,
-      ); //navegamos a la pantalla de inicio y reemplazamos la pantalla de login
+      if (!mounted) return;
+      _showSuccessSnackBar('Bienvenido(a) ${authResponse.nombres}');
+      context.router.replaceAll([const MainLayoutRoute()]);
     } catch (e) {
       if (!mounted) {
-        return; //verificamos que el widget aún esté en el árbol de widgets
+        return;
       }
-      //-----------Mensaje para cuando el login falla-----------
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error: ${e.toString().replaceFirst('Exception: ', '')}',
-          ),
-          backgroundColor: Theme.of(context)
-              .colorScheme
-              .tertiary, //utilizamos un color del tema para que combine con el diseño,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showErrorSnackBar(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) {
         setState(() {
           _isLoading =
-              false; //finalizamos el estado de carga y habilitamos el botón
+              false;
         });
       }
     }
   }
 
+  // --------------------- Snackbar helpers --------------------- //
+  void _showSuccessSnackBar(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: colorScheme.primaryContainer.withAlpha((0.95 * 255).round()),
+        duration: const Duration(seconds: 3),
+        content: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.green,
+              radius: 16,
+              child: const Icon(Icons.check, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                ' $message',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: colorScheme.errorContainer.withAlpha((0.95 * 255).round()),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: colorScheme.error,
+              radius: 16,
+              child: const Icon(
+                Icons.error_outline,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Error: $message',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -137,72 +224,110 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // ------Apartado de Usuario---------
-              TextField(
-                controller:
-                    _usernameController, //asociamos el controlador al campo de texto
-                style: textTheme.bodyMedium!.copyWith(
-                  color: colorScheme.onSurface, //color del texto según el tema
-                  fontSize: 16,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Nombre de usuario',
-                  hintText: 'Ingrese su nombre de usuario',
-                  prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8), //borde redondeado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: colorScheme
-                          .secondaryContainer, //color del borde según el tema
-                      width: 2, //grosor del borde
+              // ------Formulario de login (validación mostrada solo tras tocar y salir del campo)---------
+              Form(
+                // Usamos AutovalidateMode.always pero los validators solo mostrarán
+                // errores si el campo ha sido tocado (focus lost). Esto evita errores
+                // inmediatos al entrar a la pantalla.
+                autovalidateMode: AutovalidateMode.always,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _usernameController,
+                      focusNode: _usernameFocus,
+                      textInputAction: TextInputAction.next,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface,
+                        fontSize: 16,
+                      ),
+                      validator: (value) {
+                        if (!_usernameTouched) return null;
+                        final String usernameValue = value?.trim() ?? '';
+                        if (usernameValue.isEmpty) return 'Por favor ingrese su usuario';
+                        return null;
+                      },
+                      onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+                      decoration: InputDecoration(
+                        labelText: 'Nombre de usuario',
+                        hintText: 'Ingrese su nombre de usuario',
+                        prefixIcon: Icon(Icons.person, color: colorScheme.onSurface),
+                        errorStyle: TextStyle(color: colorScheme.error),
+                        labelStyle: textTheme.bodySmall!.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: colorScheme.secondaryContainer,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 10,
+                        ),
+                      ),
                     ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 10,
-                  ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                      validator: (value) {
+                        if (!_passwordTouched) return null;
+                        final String passwordValue = value ?? '';
+                        if (passwordValue.isEmpty) return 'Por favor ingrese su contraseña';
+                        return null;
+                      },
+                      onFieldSubmitted: (_) {
+                        if (_isFormValid && !_isLoading) _login();
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña',
+                        hintText: 'Ingrese su contraseña',
+                        prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
+                        errorStyle: TextStyle(color: colorScheme.error),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: colorScheme.onSurface,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                        labelStyle: textTheme.bodySmall!.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: colorScheme.secondaryContainer,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 10,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // ------Apartado de Contraseña---------
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                style: textTheme.bodyMedium!.copyWith(
-                  color: colorScheme.onSurface, //color del texto según el tema
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  hintText: 'Ingrese su contraseña',
-                  prefixIcon: Icon(Icons.lock, color: colorScheme.onSurface),
-                  labelStyle: textTheme.bodySmall!.copyWith(color: colorScheme.onSurface),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: colorScheme
-                          .secondaryContainer, //color del borde según el tema
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 10,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
 
               // ------Boton de login---------
               ElevatedButton(
-                onPressed: _isLoading ? null : _login,
+                onPressed: (_isLoading || !_isFormValid) ? null : _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme
                       .secondaryContainer, //color del botón según el tema

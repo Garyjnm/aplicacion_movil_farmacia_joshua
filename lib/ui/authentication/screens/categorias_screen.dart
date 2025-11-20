@@ -10,8 +10,7 @@ import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
 class CategoriasScreen extends StatefulWidget {
-  static const String routeName = '/categorias';
-  const CategoriasScreen({Key? key}) : super(key: key);
+  const CategoriasScreen({super.key});
 
   @override
   State<CategoriasScreen> createState() => _CategoriasScreenState();
@@ -141,65 +140,62 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         (_currentPage * _itemsPerPage).clamp(0, _filteredCategorias.length);
     final categoriasPagina = _filteredCategorias.sublist(startIndex, endIndex);
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      appBar: AppBar(
-        backgroundColor: colors.primaryContainer,
-        title: Text(
-          "Categorías",
-          style: fonts.titleLarge?.copyWith(color: colors.onPrimaryContainer, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: IconThemeData(color: colors.onPrimaryContainer),
-      ),
-      body: Column(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         children: [
           // Campo de búsqueda
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child:
-                CustomTextField(controller: _searchController, label: "Buscar categoría..."),
+          CustomTextField(
+            controller: _searchController,
+            label: "Buscar categoría...",
           ),
+          const SizedBox(height: 8),
           // Botón agregar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          Align(
+            alignment: Alignment.centerLeft,
             child: CustomCreateButton(
               label: "Agregar Categoría",
               onPressed: () => _mostrarDialogo(),
+              alignment: Alignment.centerLeft,
             ),
           ),
+          const SizedBox(height: 8),
           //  Lista de categorías
           Expanded(
             child: _filteredCategorias.isEmpty
-                ? Center(child: Text("No hay categorías", style: fonts.bodyMedium))
+                ? Center(
+                    child: Text(
+                      "No hay categorías",
+                      style: fonts.bodyMedium?.copyWith(
+                        color: colors.onSurface,
+                      ),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: categoriasPagina.length,
                     itemBuilder: (context, index) {
                       final categoria = categoriasPagina[index];
                       return CustomCard(
-                        child: ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          title: Text(
-                            categoria.nombre,
-                            style:
-                                fonts.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                        title: categoria.nombre,
+                        subtitle: categoria.descripcion,
+                        actions: [
+                          IconButton(
+                            tooltip: 'Editar',
+                            icon: Icon(
+                              Icons.edit,
+                              color: colors.secondaryContainer,
+                            ),
+                            onPressed: () => _mostrarDialogo(categoria: categoria),
                           ),
-                          subtitle:
-                              Text(categoria.descripcion, style: fonts.bodyMedium),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () => _mostrarDialogo(categoria: categoria),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => _confirmarEliminar(categoria),
-                              ),
-                            ],
+                          IconButton(
+                            tooltip: 'Eliminar',
+                            icon: Icon(
+                              Icons.delete,
+                              color: colors.error,
+                            ),
+                            onPressed: () => _confirmarEliminar(categoria),
                           ),
-                        ),
+                        ],
                       );
                     },
                   ),

@@ -2,14 +2,16 @@ import 'package:dio/dio.dart';
 import '../models/auth_response.dart';
 
 class AuthService {
-  final String baseUrl = 'http://10.0.2.2:50498/api'; //Url de la API de momento despues se cambiara por la real
+  // Use the deployed Azure API as the base URL
+  // Note: ensure the trailing '/api' matches your server routing (Keystone: the swagger URL uses '/swagger', API root usually '/api')
+  final String baseUrl = 'https://farmaciajoshua-f7bncqe5aaefdsfp.switzerlandnorth-01.azurewebsites.net/api';
   final Dio _dio = Dio(); // Instancia de Dio para realizar las solicitudes HTTP
 
   AuthService() { // Constructor para inicializar la configuración de Dio
     _dio.options = BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 5), // Tiempo de espera para la conexión
-      receiveTimeout: const Duration(seconds: 50), // Tiempo de espera para recibir datos
+      receiveTimeout: const Duration(seconds: 15), // Tiempo de espera para recibir datos
       headers: {
         'Content-Type': 'application/json',
       },

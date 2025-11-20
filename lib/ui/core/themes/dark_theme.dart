@@ -8,8 +8,9 @@ final ColorScheme _darkColorScheme = const ColorScheme(
   onPrimaryContainer: Colors.white,
   secondary: Color(0xFFA3BECD),
   onSecondary: Color(0xFF1B194B),
-  error: Color(0xFFE6F2F9),
-  onError: Color(0xFF4D0A0F),
+  // Color de error para modo oscuro (visibilidad en fondos oscuros)
+  error: Color(0xFFB00020),
+  onError: Color(0xFFFFFFFF),
   surface: Color.fromARGB(255, 0, 0, 0),
   onSurface: Colors.white,
 );

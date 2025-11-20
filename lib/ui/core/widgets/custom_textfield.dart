@@ -3,31 +3,55 @@ import 'package:flutter/material.dart';
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  final bool obscureText; // 👈 ahora es propiedad de la clase
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final bool enabled; 
+  final Color? fillColor; // permite personalizar el fondo
 
   const CustomTextField({
     Key? key,
     required this.controller,
     required this.label,
-    this.obscureText = false, // 👈 valor por defecto (no requerido)
+    this.obscureText = false,
+    this.keyboardType,
+    this.enabled = true, 
+    this.fillColor,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return TextField(
       controller: controller,
-      obscureText: obscureText, // 👈 ahora sí se usa aquí
-      style: TextStyle(color: colors.onPrimaryContainer),
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      enabled: enabled,
+      style: TextStyle(
+        color: enabled
+            ? colors.onSurface
+            : colors.onSurfaceVariant,
+      ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: colors.onPrimaryContainer),
+        labelStyle: TextStyle(
+          color: enabled
+              ? colors.onSurface
+              : colors.onSurfaceVariant,
+        ),
+
         filled: true,
-        fillColor: colors.primaryContainer,
+        // Fondo blanco por defecto de forma global (si no se especifica).
+        fillColor: fillColor ?? (enabled
+          ? Colors.white
+          : colors.surfaceVariant), 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: colors.primary,
+            width: 2,
+          ),
         ),
       ),
     );
